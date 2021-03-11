@@ -20,6 +20,16 @@ from mttkinter import *
 import halcon as ha
 
 from makeCM import make_confusion_matrix
+engine = ha.HDevEngine()
+engine.set_procedure_path('C:/Program Files/MVTec/HALCON-20.11-Progress/procedures')
+
+engine.set_procedure_path(
+        'C:/Users/930415/Desktop/Halcon DL library files')
+
+proc = ha.HDevProcedure.load_external('augment_prepare')
+augment_proc_call = ha.HDevProcedureCall(proc)
+prep_for_training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('prepare_for_training'))
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
 
 class ObjectDetection(GUI):
     def __init__(self, parent, controller):
@@ -55,41 +65,33 @@ class ObjectDetection(GUI):
                                         bg=backgroundColor,fg='dark red')
         ObjectDetection_label.place(rely=0, relx=0.1, height=50)
 
-        ImageDirDirectory_path = StringVar()
-        PreprocessDirDirectory_path = StringVar()
-        ModelDirDirectory_path = StringVar()
+        RootDirectory_path = StringVar()
+        HalconImageDirectory_path = StringVar()
+        #ModelDirDirectory_path = StringVar()
 
         def ImageDirDirectory():
             path = filedialog.askdirectory(initialdir="/", title="Select folder", )
-            ImageDirDirectory_path.set(path)
-            ImageDirGotLabel.config(text=path)
+            RootDirectory_path.set(path)
+            RootDirectoryGotLabel.config(text=path)
 
-        ImageDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'),
+        RootDirectoryGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'),
                                     bg=("%s" % dir_color))
-        ImageDirGotLabel.grid(row=1, column=1)
-        ImageDirButton = tk.Button(frameSettings, text="Image Directory", command=lambda: ImageDirDirectory())
-        ImageDirButton.grid(row=1, column=0)
+        RootDirectoryGotLabel.grid(row=1, column=1)
+        RootDirectoryButton = tk.Button(frameSettings, text="Root Directory", command=lambda: ImageDirDirectory())
+        RootDirectoryButton.grid(row=1, column=0)
 
         def PreprocessDirDirectory():
             path = filedialog.askdirectory(initialdir="/", title="Select folder", )
-            PreprocessDirDirectory_path.set(path)
-            PreprocessDirGotLabel.config(text=path)
+            HalconImageDirectory_path.set(path)
+            HalconImageDirGotLabel.config(text=path)
 
-        PreprocessDirButton = tk.Button(frameSettings, text="Preprocess Directory",
+        HalconImageDirButton = tk.Button(frameSettings, text="Image Directory",
                                         command=lambda: PreprocessDirDirectory())
-        PreprocessDirButton.grid(row=2, column=0)
-        PreprocessDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
-        PreprocessDirGotLabel.grid(row=2, column=1)
+        HalconImageDirButton.grid(row=2, column=0)
+        HalconImageDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
+        HalconImageDirGotLabel.grid(row=2, column=1)
 
-        def ModelDirDirectory():
-            path = filedialog.askdirectory(initialdir="/", title="Select folder", )
-            ModelDirDirectory_path.set(path)
-            ModelDirGotLabel.config(text=path)
 
-        ModelDirButton = tk.Button(frameSettings, text="Model Directory", command=lambda: ModelDirDirectory())
-        ModelDirButton.grid(row=3, column=0)
-        ModelDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
-        ModelDirGotLabel.grid(row=3, column=1)
 
         # Dropdown list for pretrained model
         PretrainedModelList = ["classifier_enhanced", "classifier_compact"]
@@ -101,207 +103,290 @@ class ObjectDetection(GUI):
         dropListLabel = tk.Label(frameSettings, text="Pretrained model: ", font=('calibre', 10, 'bold'),
                                  bg=backgroundColor)
         dropListLabel.grid(row=5, column=0)
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar  3 11:52:50 2021
 
-@author: ET-GTX2
-"""
+        ImWidth_var = tk.IntVar()
+        ImHeight_var = tk.IntVar()
+        ImChannel_var = tk.IntVar()
 
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar  3 11:52:50 2021
+        BatchSize_var = tk.StringVar()
+        InitialLearningRate_var = tk.DoubleVar()
+        Momentum_var = tk.DoubleVar()
+        NumEpochs_var = tk.IntVar()
+        ChangeLearningRateEpochs_var = tk.StringVar()  ##
+        lr_change_var = tk.StringVar()  ##
+        WeightPrior_var = tk.DoubleVar()
+        class_penalty_var = tk.StringVar()  ##
 
-@author: ET-GTX2
-"""
+        ImWidth_label = tk.Label(frame_Parameters, text='Image Width:', font=('calibre', 10, 'bold'),
+                                 bg=backgroundColor)
+        ImWidth_entry = tk.Entry(frame_Parameters, textvariable=ImWidth_var, font=('calibre', 10, 'normal'))
 
-import os
+        ImHeight_label = tk.Label(frame_Parameters, text='Image Height:', font=('calibre', 10, 'bold'),
+                                  bg=backgroundColor)
+        ImHeight_entry = tk.Entry(frame_Parameters, textvariable=ImHeight_var, font=('calibre', 10, 'normal'))
 
-import halcon as ha
+        ImChannel_label = tk.Label(frame_Parameters, text='Image Channel:', font=('calibre', 10, 'bold'),
+                                   bg=backgroundColor)
+        ImChannel_entry = tk.Entry(frame_Parameters, textvariable=ImChannel_var, font=('calibre', 10, 'normal'))
 
-###### Input/output directories ######
-ImageWidth = str(512)
-ImageHeight = str(320)
+        BatchSize_label = tk.Label(frame_Parameters, text='Batch Size:', font=('calibre', 10, 'bold'),
+                                   bg=backgroundColor)
+        BatchSize_entry = tk.Entry(frame_Parameters, textvariable=BatchSize_var, font=('calibre', 10, 'normal'))
 
-# Main training directory
-RootDir = 'E:/Customer evaluation/Seagate/HDevEngine_Python_OD/'
-MainDir = RootDir + 'detect_pills_data'
-# Path to the image directory.
-HalconImageDir = 'E:/MVTec/Halcon-20.11-Progress/examples/images/pill_bag'
+        InitialLearningRate_label = tk.Label(frame_Parameters, text='Initial Learning Rate:',
+                                             font=('calibre', 10, 'bold'),
+                                             bg=backgroundColor)
+        InitialLearningRate_entry = tk.Entry(frame_Parameters, textvariable=InitialLearningRate_var,
+                                             font=('calibre', 10, 'normal'))
 
-ExampleDataDir = MainDir
-ModelFileName = './detect_pills_data/pretrained_dl_model_detection.hdl'
-DataDirectory = ExampleDataDir + '/dldataset_pill_bag_' + ImageWidth + 'x' + ImageHeight
-DLDatasetFileName = DataDirectory + '/dl_dataset.hdict'
-DLPreprocessParamFileName = DataDirectory + '/dl_preprocess_param.hdict'
-BestModelBaseName = ExampleDataDir + '/best_dl_model_classification'
-FinalModelBaseName = ExampleDataDir + '/final_dl_model_classification'
+        Momentum_label = tk.Label(frame_Parameters, text='Momentum:', font=('calibre', 10, 'bold'), bg=backgroundColor)
+        Momentum_entry = tk.Entry(frame_Parameters, textvariable=Momentum_var, font=('calibre', 10, 'normal'))
 
-###### Parameter settings ######
+        NumEpochs_label = tk.Label(frame_Parameters, text='Number of Epochs:', font=('calibre', 10, 'bold'),
+                                   bg=backgroundColor)
+        NumEpochs_entry = tk.Entry(frame_Parameters, textvariable=NumEpochs_var, font=('calibre', 10, 'normal'))
 
-BatchSize = 'maximum'
-InitialLearningRate = 1e-3
-Momentum = 0.9
-NumEpochs = 3
-StartEpoch = 0
-EvaluationIntervalEpochs = 1
-ChangeLearningRateEpochs = [4, 8, 12]
+        ChangeLearningRateEpochs_label = tk.Label(frame_Parameters, text='Change Learning Rate Epochs:',
+                                                  font=('calibre', 10, 'bold'), bg=backgroundColor)
+        ChangeLearningRateEpochs_entry = tk.Entry(frame_Parameters, textvariable=ChangeLearningRateEpochs_var,
+                                                  font=('calibre', 10, 'normal'))
+        ChangeLearningRateEpochs_format = tk.Label(frame_Parameters, text='E.g. : 1, 2, 3...',
+                                                   font=('calibre', 10, 'bold'), bg=backgroundColor, fg='dark red')
 
-###### Advanced Parameter settings ######
+        lr_change_label = tk.Label(frame_Parameters, text='Learning Rate Schedule:', font=('calibre', 10, 'bold'),
+                                   bg=backgroundColor)
+        lr_change_entry = tk.Entry(frame_Parameters, textvariable=lr_change_var, font=('calibre', 10, 'normal'))
+        lr_change_format = tk.Label(frame_Parameters, text='E.g. : 0.1, 0.01, 0.001', font=('calibre', 10, 'bold'),
+                                    bg=backgroundColor, fg='dark red')
 
-WeightPrior = 0.0005
+        WeightPrior_label = tk.Label(frame_Parameters, text='Regularisation Constant:', font=('calibre', 10, 'bold'),
+                                     bg=backgroundColor)
+        WeightPrior_entry = tk.Entry(frame_Parameters, textvariable=WeightPrior_var, font=('calibre', 10, 'normal'))
+        WeightPrior_format = tk.Label(frame_Parameters, text='To reduce over-fitting', font=('calibre', 10, 'bold'),
+                                      bg=backgroundColor, fg='dark red')
 
-lr_change = [0.1, 0.01, 0.001]
+        class_penalty_label = tk.Label(frame_Parameters, text='Class Penalty:', font=('calibre', 10, 'bold'),
+                                       bg=backgroundColor)
+        class_penalty_entry = tk.Entry(frame_Parameters, textvariable=class_penalty_var, font=('calibre', 10, 'normal'))
+        class_penalty_format = tk.Label(frame_Parameters, text='E.g. : 1, 1', font=('calibre', 10, 'bold'),
+                                        bg=backgroundColor, fg='dark red')
 
-Class_Penalty = [1.0, 1.0, 1.0]  # Each class should be assigned with a penalty value
+        settingEntryLength = 6
+        ImWidth_label.grid(row=3, column=0, sticky="W")
+        ImWidth_entry.grid(row=3, column=1, ipadx=settingEntryLength)
+        ImWidth_entry.insert(END, '1')
 
-###### Augmentation parameter settings ######
-# The percentage of the images that are to be augmented.
-AugmentationPercentage = 20  # Expects integer value in the range [0, 100]
+        ImHeight_label.grid(row=4, column=0, sticky="W")
+        ImHeight_entry.grid(row=4, column=1, ipadx=settingEntryLength)
+        ImHeight_entry.insert(END, '2')
 
-# Step size for possible rotations.
-Rotation = 0  # expects values in the range [-180, 180]
+        ImChannel_label.grid(row=5, column=0, sticky="W")
+        ImChannel_entry.grid(row=5, column=1, ipadx=settingEntryLength)
+        ImChannel_entry.insert(END, '3')
 
-# Allowed mirroring types are coded by 'r' (row), 'c' (column).
-Mirror = 'off'  # expects 'r' or 'c' or 'rc'
+        BatchSize_label.grid(row=7, column=0, sticky="W")
+        BatchSize_entry.grid(row=7, column=1, ipadx=settingEntryLength)
+        BatchSize_entry.insert(END, '1')
 
-# Absolute brightness change can vary in the range [-value, +value]
-BrightnessVariation = 0
+        InitialLearningRate_label.grid(row=8, column=0, sticky="W")
+        InitialLearningRate_entry.grid(row=8, column=1, ipadx=settingEntryLength)
+        InitialLearningRate_entry.insert(END, '01')
 
-# The absolute brightness peak of a randomly positioned spot can vary in the range [-value, +value]
-BrightnessVariationSpot = 0
+        Momentum_label.grid(row=9, column=0, sticky="W")
+        Momentum_entry.grid(row=9, column=1, ipadx=settingEntryLength)
+        Momentum_entry.insert(END, '9')
 
-###### Special augmentation parameters for Classification module ######
-# Fraction of image length and width that remains after cropping (in %).
-CropPercentage = 'off'  # Expects 'off' or value in %
+        NumEpochs_label.grid(row=11, column=0, sticky="W")
+        NumEpochs_entry.grid(row=11, column=1, ipadx=settingEntryLength)
+        NumEpochs_entry.insert(END, '1')
 
-# Image length and width that remains after cropping (in pixel).
-CropPixel = 'off'  # Expects 'off' or integer value
+        ChangeLearningRateEpochs_label.grid(row=12, column=0, sticky="W")
+        ChangeLearningRateEpochs_format.grid(row=12, column=2, sticky="W")
+        ChangeLearningRateEpochs_entry.grid(row=12, column=1, ipadx=settingEntryLength)
+        ChangeLearningRateEpochs_entry.insert(END, "0, 0")
 
-# Step range for rotations with step size 1.
-# Not applicable for object detection
-RotationRange = 10
+        lr_change_label.grid(row=13, column=0, sticky="W")
+        lr_change_format.grid(row=13, column=2, sticky="W")
+        lr_change_entry.grid(row=13, column=1, ipadx=settingEntryLength)
+        lr_change_entry.insert(END, "0,0")
 
-###### Special augmentation parameters for Object Detection module ######
-# In case of a detection model of instance_type 'rectangle2': Use directions of instances within bounding boxes.
-IgnoreDirection = 'false'  # Expects true or false
+        WeightPrior_label.grid(row=14, column=0, sticky="W")
+        WeightPrior_entry.grid(row=14, column=1, ipadx=settingEntryLength)
+        WeightPrior_entry.insert(END, '1')
+        WeightPrior_format.grid(row=14, column=2, sticky="W")
 
-# In case of a detection model of instance_type 'rectangle2': Class IDs without orientation.
-ClassIDsNoOrientationExist = 'false'  # Expect true or false
-ClassIDsNoOrientation = []  # Default []
+        class_penalty_label.grid(row=17, column=0, sticky="W")
+        class_penalty_format.grid(row=17, column=2, sticky="W")
+        class_penalty_entry.grid(row=17, column=1, ipadx=settingEntryLength)
+        class_penalty_entry.insert(END, "1.0, 1.0, 1.0")
 
+        """
+        Setting frame components (Right Top frame)
+        frameSettings
+        """
+        # CPU or GPU, Runtime. 1=CPU, 2=GPU
+        Runtime_var = tk.IntVar()
+        R1 = tk.Radiobutton(frameSettings, text="Use CPU", variable=Runtime_var, value=1, bg=backgroundColor)
+        R1.grid(row=0, column=0)
+        R2 = tk.Radiobutton(frameSettings, text="Use GPU", variable=Runtime_var, value=2, bg=backgroundColor)
+        R2.grid(row=0, column=1)
 
-def setup_hdev_engine():
-    """Setup HDevEngine by setting procedure search paths."""
-    source_dir = 'E:/Customer evaluation/Seagate/'
-    hdev_source_dir = source_dir
+        ###############################################################################################################
+        ###########################################Augmentation########################################################
+        ###############################################################################################################
 
-    engine = ha.HDevEngine()
-    engine.set_procedure_path('E:/MVTec/Halcon-20.11-Progress/procedures')
+        AugEnable_var = tk.IntVar()
+        frame_Augmentation.place_forget()
+        AugEnable_label = tk.Label(frame_Parameters, text='Usage of Augmentation: ', font=('calibre', 10, 'bold'),
+                                   bg=backgroundColor)
+        AugEnable_label.grid(row=18, column=0, sticky="W")
+        Enable = tk.Radiobutton(frame_Parameters, text="Enable", variable=AugEnable_var, value=1, bg=backgroundColor,
+                                indicatoron=False, width=8,
+                                command=lambda: frame_Augmentation.place(rely=0.47, relx=0.02, height=300, width=600))
+        Enable.grid(row=18, column=1)
+        Disable = tk.Radiobutton(frame_Parameters, text="Disable", variable=AugEnable_var, value=2, bg=backgroundColor,
+                                 indicatoron=False, width=8, command=lambda: frame_Augmentation.place_forget())
+        Disable.grid(row=18, column=2)
 
-    engine.set_procedure_path(
-        'E:/Customer evaluation/Seagate/HDevEngine_Python_OD/HDPL files')  # path where dl_training_PK.hdl and dl_visulaization_PK.hdl files are located
+        AugmentationPercentage_var = tk.IntVar()
+        Rotation_var = tk.IntVar()
+        Mirror_var = tk.StringVar()
+        BrightnessVariation_var = tk.IntVar()
+        BrightnessVariationSpot_var = tk.IntVar()
+        CropPercentage_var = tk.StringVar()
+        CropPixel_var = tk.StringVar()
+        RotationRange_var = tk.IntVar()
+        IgnoreDirection_var = tk.StringVar()
+        ClassIDsNoOrientationExist_var = tk.StringVar()
+        ClassIDsNoOrientation_var = tk.StringVar()
 
-    # engine.set_procedure_path('E:/Customer evaluation/Seagate/HDev Engine_Python/dl_training_PK.hdpl')
-    # engine.set_procedure_path('E:/Customer evaluation/Seagate/HDev Engine_Python/dl_visualization_PK.hdpl')
+        AugmentationPercentage_label = tk.Label(frame_Augmentation, text='Percentage:',
+                                                font=('calibre', 10, 'bold'),
+                                                bg=backgroundColor)
+        AugmentationPercentage_entry = tk.Entry(frame_Augmentation, textvariable=AugmentationPercentage_var,
+                                                font=('calibre', 10, 'normal'))
+        AugmentationPercentage_format = tk.Label(frame_Augmentation, text='0 to 100',
+                                                 font=('calibre', 10, 'bold'),
+                                                 bg=backgroundColor, fg='dark red')
 
-    return hdev_source_dir
+        Rotation_label = tk.Label(frame_Augmentation, text='Rotation:',
+                                  font=('calibre', 10, 'bold'),
+                                  bg=backgroundColor)
+        Rotation_entry = tk.Entry(frame_Augmentation, textvariable=Rotation_var,
+                                  font=('calibre', 10, 'normal'))
+        Rotation_format = tk.Label(frame_Augmentation, text='-180, -90, 0, 90, 180',
+                                   font=('calibre', 10, 'bold'),
+                                   bg=backgroundColor, fg='dark red')
 
+        mirror_label = tk.Label(frame_Augmentation, text='Mirror:', font=('calibre', 10, 'bold'),
+                                bg=backgroundColor)
+        mirror_entry = tk.Entry(frame_Augmentation, textvariable=Mirror_var, font=('calibre', 10, 'normal'))
+        mirror_format = tk.Label(frame_Augmentation, text="'r' , 'c' , 'rc' , 'off' ",
+                                 font=('calibre', 10, 'bold'),
+                                 bg=backgroundColor, fg='dark red')
 
-def augment_prepare(proc_name_augment):
-    proc = ha.HDevProcedure.load_external(proc_name_augment)
-    # proc = ha.HDevProcedureCall('train_dl_model_PK')
-    proc_call = ha.HDevProcedureCall(proc)
+        BrightnessVariation_label = tk.Label(frame_Augmentation, text='Brightness Range:',
+                                             font=('calibre', 10, 'bold'), bg=backgroundColor)
+        BrightnessVariation_entry = tk.Entry(frame_Augmentation, textvariable=BrightnessVariation_var,
+                                             font=('calibre', 10, 'normal'))
+        BrightnessVariation_format = tk.Label(frame_Augmentation, text="-value / +value",
+                                              font=('calibre', 10, 'bold'),
+                                              bg=backgroundColor, fg='dark red')
 
-    proc_call.set_input_control_param_by_name('AugmentationPercentage', AugmentationPercentage)
-    proc_call.set_input_control_param_by_name('Rotation', Rotation)
-    proc_call.set_input_control_param_by_name('Mirror', Mirror)
-    proc_call.set_input_control_param_by_name('BrightnessVariation', BrightnessVariation)
-    proc_call.set_input_control_param_by_name('BrightnessVariationSpot', BrightnessVariationSpot)
-    proc_call.set_input_control_param_by_name('CropPercentage', CropPercentage)
-    proc_call.set_input_control_param_by_name('CropPixel', CropPixel)
-    proc_call.set_input_control_param_by_name('RotationRange', RotationRange)
-    proc_call.set_input_control_param_by_name('IgnoreDirection', IgnoreDirection)
-    proc_call.set_input_control_param_by_name('ClassIDsNoOrientationExist', ClassIDsNoOrientationExist)
-    proc_call.set_input_control_param_by_name('ClassIDsNoOrientation', ClassIDsNoOrientation)
+        BrightnessVariationSpot_label = tk.Label(frame_Augmentation, text='Brightness Range Focus:',
+                                                 font=('calibre', 10, 'bold'),
+                                                 bg=backgroundColor)
+        BrightnessVariationSpot_entry = tk.Entry(frame_Augmentation, textvariable=BrightnessVariationSpot_var,
+                                                 font=('calibre', 10, 'normal'), state='disabled')
 
-    proc_call.execute()
+        CropPercentage_label = tk.Label(frame_Augmentation, text='Crop Percentage:', font=('calibre', 10, 'bold'),
+                                        bg=backgroundColor)
+        CropPercentage_entry = tk.Entry(frame_Augmentation, textvariable=CropPercentage_var,
+                                        font=('calibre', 10, 'normal'), state='disabled')
 
-    GenParamName_augment = proc_call.get_output_control_param_by_name('GenParamName_augment')
-    GenParamValue_augment = proc_call.get_output_control_param_by_name('GenParamValue_augment')
+        CropPixel_label = tk.Label(frame_Augmentation, text='Crop Pixel:', font=('calibre', 10, 'bold'),
+                                   bg=backgroundColor)
+        CropPixel_entry = tk.Entry(frame_Augmentation, textvariable=CropPixel_var, font=('calibre', 10, 'normal'),
+                                   state='disabled')
 
-    return GenParamName_augment, GenParamValue_augment
+        RotationRange_label = tk.Label(frame_Augmentation, text='Rotation Range:',
+                                       font=('calibre', 10, 'bold'), bg=backgroundColor)
+        RotationRange_entry = tk.Entry(frame_Augmentation, textvariable=RotationRange_var,
+                                       font=('calibre', 10, 'normal'), state='disabled')
 
+        IgnoreDirection_label = tk.Label(frame_Augmentation, text='Ignore Direction:',
+                                         font=('calibre', 10, 'bold'), bg=backgroundColor)
+        IgnoreDirection_entry = tk.Entry(frame_Augmentation, textvariable=IgnoreDirection_var,
+                                         font=('calibre', 10, 'normal'), state='disabled')
 
-def prep_for_training(GenParamName_augment, GenParamValue_augment, proc_name):
-    """Execute procedure for image acquisition."""
-    proc = ha.HDevProcedure.load_external(proc_name)
-    proc_call = ha.HDevProcedureCall(proc)
+        ClassIDsNoOrientationExist_label = tk.Label(frame_Augmentation, text='Class IDs No Orientation Exist:',
+                                                    font=('calibre', 10, 'bold'), bg=backgroundColor)
+        ClassIDsNoOrientationExist_entry = tk.Entry(frame_Augmentation, textvariable=ClassIDsNoOrientationExist_var,
+                                                    font=('calibre', 10, 'normal'), state='disabled')
 
-    proc_call.set_input_control_param_by_name('ExampleDataDir', ExampleDataDir)
-    proc_call.set_input_control_param_by_name('ModelFileName', ModelFileName)
-    # proc_call.set_input_control_param_by_name('DataDirectory', DataDirectory)
-    proc_call.set_input_control_param_by_name('DLDatasetFileName', DLDatasetFileName)
-    proc_call.set_input_control_param_by_name('DLPreprocessParamFileName', DLPreprocessParamFileName)
-    proc_call.set_input_control_param_by_name('BestModelBaseName', BestModelBaseName)
-    proc_call.set_input_control_param_by_name('FinalModelBaseName', FinalModelBaseName)
-    proc_call.set_input_control_param_by_name('BatchSize', BatchSize)
-    proc_call.set_input_control_param_by_name('InitialLearningRate', InitialLearningRate)
-    proc_call.set_input_control_param_by_name('Momentum', Momentum)
-    proc_call.set_input_control_param_by_name('NumEpochs', NumEpochs)
-    proc_call.set_input_control_param_by_name('EvaluationIntervalEpochs', EvaluationIntervalEpochs)
-    proc_call.set_input_control_param_by_name('ChangeLearningRateEpochs', ChangeLearningRateEpochs)
+        ClassIDsNoOrientation_label = tk.Label(frame_Augmentation, text='Class IDs No Orientation:',
+                                               font=('calibre', 10, 'bold'), bg=backgroundColor)
+        ClassIDsNoOrientation_entry = tk.Entry(frame_Augmentation, textvariable=ClassIDsNoOrientation_var,
+                                               font=('calibre', 10, 'normal'), state='disabled')
 
-    proc_call.set_input_control_param_by_name('lr_change', lr_change)
-    proc_call.set_input_control_param_by_name('WeightPrior', WeightPrior)
-    proc_call.set_input_control_param_by_name('GenParamName_augment', GenParamName_augment)
-    proc_call.set_input_control_param_by_name('GenParamValue_augment', GenParamValue_augment)
-    proc_call.set_input_control_param_by_name('Class_Penalty', Class_Penalty)
+        AugmentationPercentage_label.grid(row=0, column=0, sticky="W")
+        AugmentationPercentage_entry.grid(row=0, column=1, ipadx=settingEntryLength)
+        AugmentationPercentage_entry.insert(0, '0')
+        AugmentationPercentage_format.grid(row=0, column=2, sticky="W")
 
-    proc_call.execute()
+        Rotation_label.grid(row=1, column=0, sticky="W")
+        Rotation_entry.grid(row=1, column=1, ipadx=settingEntryLength)
+        Rotation_entry.insert(0, '0')
+        Rotation_format.grid(row=1, column=2, sticky="W")
 
-    DLModelHandle = proc_call.get_output_control_param_by_name('DLModelHandle')
-    DLDataset = proc_call.get_output_control_param_by_name('DLDataset')
-    TrainParam = proc_call.get_output_control_param_by_name('TrainParam')
+        mirror_label.grid(row=2, column=0, sticky="W")
+        mirror_entry.grid(row=2, column=1, ipadx=settingEntryLength)
+        mirror_entry.insert(0, 'off')
+        mirror_format.grid(row=2, column=2, sticky="W")
 
-    return DLModelHandle, DLDataset, TrainParam
+        BrightnessVariation_label.grid(row=3, column=0, sticky="W")
+        BrightnessVariation_entry.grid(row=3, column=1, ipadx=settingEntryLength)
+        BrightnessVariation_entry.insert(0, '0')
+        BrightnessVariation_format.grid(row=3, column=2, sticky="W")
 
+        BrightnessVariationSpot_label.grid(row=4, column=0, sticky="W")
+        BrightnessVariationSpot_entry.grid(row=4, column=1, ipadx=settingEntryLength)
+        # BrightnessVariationSpot_entry.insert(0, '0')
 
-def training(DLDataset, DLModelHandle, TrainParam):
-    proc_training = ha.HDevProcedure.load_external('train_dl_model_PK')
-    proc_call = ha.HDevProcedureCall(proc_training)
+        CropPercentage_label.grid(row=5, column=0, sticky="W")
+        CropPercentage_entry.grid(row=5, column=1, ipadx=settingEntryLength)
+        # CropPercentage_entry.insert(0,'50')
 
-    proc_call.set_input_control_param_by_name('DLModelHandle', DLModelHandle)
-    proc_call.set_input_control_param_by_name('DLDataset', DLDataset)
-    proc_call.set_input_control_param_by_name('TrainParam', TrainParam)
-    proc_call.set_input_control_param_by_name('StartEpoch', StartEpoch)
+        CropPixel_label.grid(row=6, column=0, sticky="W")
+        CropPixel_entry.grid(row=6, column=1, ipadx=settingEntryLength)
+        # CropPixel_entry.insert(0, '100')
 
-    proc_call.execute()
+        RotationRange_label.grid(row=7, column=0, sticky="W")
+        RotationRange_entry.grid(row=7, column=1, ipadx=settingEntryLength)
+        # RotationRange_entry.insert(0, '0')
 
+        IgnoreDirection_label.grid(row=8, column=0, sticky="W")
+        IgnoreDirection_entry.grid(row=8, column=1, ipadx=settingEntryLength)
+        # IgnoreDirection_entry.insert(0, 'false')
 
-if __name__ == '__main__':
-    hdev_source_dir = setup_hdev_engine()
+        ClassIDsNoOrientationExist_label.grid(row=9, column=0, sticky="W")
+        ClassIDsNoOrientationExist_entry.grid(row=9, column=1, ipadx=settingEntryLength)
+        # ClassIDsNoOrientationExist_entry.insert(0, 'false')
 
-    # Augmentation
-    proc_name_augment = 'augment_prepare'
-    proc_augment_preparation = augment_prepare(proc_name_augment)
+        ClassIDsNoOrientation_label.grid(row=10, column=0, sticky="W")
+        ClassIDsNoOrientation_entry.grid(row=10, column=1, ipadx=settingEntryLength)
 
-    GenParamName_augment = proc_augment_preparation[0][0]
-    GenParamValue_augment = proc_augment_preparation[1][0]
+        # ClassIDsNoOrientation_entry.insert(0, '0')
+        mean_precision_label = tk.Label(frame_Inspection_stats,
+                                        font=('calibre', 10, 'bold'), bg=backgroundColor, fg='blue4')
+        mean_recall_label = tk.Label(frame_Inspection_stats,
+                                     font=('calibre', 10, 'bold'), bg=backgroundColor, fg='blue4')
+        mean_f_score_label = tk.Label(frame_Inspection_stats,
+                                      font=('calibre', 10, 'bold'), bg=backgroundColor, fg='blue4')
 
-    # Preparation
-    proc_name = 'prepare_for_training'
-    proc_preparation = prep_for_training(GenParamName_augment, GenParamValue_augment, proc_name)
-
-    DLModelHandle = proc_preparation[0][0]
-    DLDataset = proc_preparation[1][0]
-    TrainParam = proc_preparation[2][0]
-
-    # Training
-    proc_training = training(DLDataset, DLModelHandle, TrainParam)
-
-
-
+        mean_precision_label.pack(side=tk.TOP)
+        mean_recall_label.pack(side=tk.TOP)
+        mean_f_score_label.pack(side=tk.TOP)
 
 
 

@@ -17,6 +17,7 @@ engine.set_procedure_path(
 proc = ha.HDevProcedure.load_external('augment_prepare')
 augment_proc_call = ha.HDevProcedureCall(proc)
 prep_for_training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('prepare_for_training'))
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
 
 ###### Input/output directories ######
 ImageWidth = str(960)
@@ -150,7 +151,7 @@ def prep_for_training():
 
 
 def training():
-    training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
+
     DLDataset = prep_for_training_call.get_output_control_param_by_name('DLDataset')
     DLModelHandle = prep_for_training_call.get_output_control_param_by_name('DLModelHandle')
     TrainParam = prep_for_training_call.get_output_control_param_by_name('TrainParam')
@@ -164,7 +165,6 @@ def training():
 
 
 if __name__ == '__main__':
-    setup_hdev_engine()
 
     # Augmentation
     augment_prepare()
