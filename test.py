@@ -6,7 +6,18 @@ Created on Wed Mar  3 11:52:50 2021
 """
 import halcon as ha
 import threading
+import multiprocessing
 
+engine = ha.HDevEngine()
+engine.set_procedure_path('C:/Program Files/MVTec/HALCON-20.11-Progress/procedures')
+
+engine.set_procedure_path(
+        'C:/Users/930415/Desktop/Halcon DL library files')
+
+proc = ha.HDevProcedure.load_external('augment_prepare')
+augment_proc_call = ha.HDevProcedureCall(proc)
+prep_for_training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('prepare_for_training'))
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
 ###### Input/output directories ######
 ImageWidth = str(960)
 ImageHeight = str(1024)
@@ -142,7 +153,7 @@ def training():
     DLDataset = prep_for_training_call.get_output_control_param_by_name('DLDataset')
     DLModelHandle = prep_for_training_call.get_output_control_param_by_name('DLModelHandle')
     TrainParam = prep_for_training_call.get_output_control_param_by_name('TrainParam')
-
+    print(DLModelHandle,DLDataset,TrainParam)
     training_call.set_input_control_param_by_name('DLModelHandle', DLModelHandle)
     training_call.set_input_control_param_by_name('DLDataset', DLDataset)
     training_call.set_input_control_param_by_name('TrainParam', TrainParam)
@@ -154,10 +165,6 @@ def training():
 if __name__ == '__main__':
     setup_hdev_engine()
 
-    proc = ha.HDevProcedure.load_external('augment_prepare')
-    augment_proc_call = ha.HDevProcedureCall(proc)
-    prep_for_training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('prepare_for_training'))
-    training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
     # Augmentation
     augment_prepare()
 
