@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/Halcon_Python_GUI_Project" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/PyHalcon" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/PyHalcon-GUI" vcs="Git" />
+  </component>
+</project>
