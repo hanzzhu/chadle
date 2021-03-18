@@ -16,6 +16,12 @@ import halcon as ha
 
 from makeCM import make_confusion_matrix
 
+"""
+
+Initialise Halcon
+
+"""
+
 engine = ha.HDevEngine()
 engine.set_procedure_path('C:/MVTec/Halcon-20.11-Progress/procedures')
 engine.set_procedure_path(
@@ -94,7 +100,9 @@ class Classification(GUI):  # inherits from the GUI class
         """
 
         Inputs of Parameters
-
+        
+        Mandatory
+        
         """
 
         ImWidth_var = tk.IntVar()
@@ -213,9 +221,13 @@ class Classification(GUI):  # inherits from the GUI class
         class_penalty_entry.grid(row=17, column=1, ipadx=settingEntryLength)
         class_penalty_entry.insert(END, "1.0, 1.0")
 
-        ###############################################################################################################
-        ###########################################Augmentation########################################################
-        ###############################################################################################################
+        """
+
+        Inputs of Parameters
+        
+        Augmentation
+
+        """
 
         AugEnable_var = tk.IntVar()
         frame_Augmentation.place_forget()

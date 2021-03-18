@@ -26,8 +26,8 @@ engine.set_procedure_path('C:/Program Files/MVTec/HALCON-20.11-Progress/procedur
 engine.set_procedure_path(
         'C:/Users/930415/Desktop/Halcon DL library files')
 
-proc = ha.HDevProcedure.load_external('augment_prepare')
-augment_proc_call = ha.HDevProcedureCall(proc)
+
+augment_proc_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('augment_prepare'))
 prep_for_training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('prepare_for_training'))
 training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
 
