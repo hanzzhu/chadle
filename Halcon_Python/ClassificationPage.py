@@ -37,8 +37,11 @@ class Classification(GUI):  # inherits from the GUI class
         styles = SettingVariables.frame_styles
         dir_color = SettingVariables.dirColor
         backgroundColor = SettingVariables.backgroundColor
-        # initialise frames
-        # frameSettings, frame Parameters,frame_Inspection_graphical, frameTop
+        """
+
+        Frames
+
+        """
         frame_Parameters = tk.LabelFrame(self, styles, text="Parameters")
         frame_Parameters.place(rely=0.07, relx=0.02, height=300, width=600)
 
@@ -60,32 +63,38 @@ class Classification(GUI):  # inherits from the GUI class
         frameBot = tk.LabelFrame(self, styles, )
         frameBot.place(rely=0.97, relx=0, height=30, width=1440)
 
+        """
+
+        Classification Label(Top Left)
+
+        """
+
         Classification_label = tk.Label(self, text='Classification', font=('Verdana', 20, 'bold'),
                                         bg=backgroundColor)
         Classification_label.place(rely=0, relx=0.1, height=50)
 
         """
-        Inspection frame component (Right bottom frame)
-        frameInspcton
 
-
-        tv1 = ttk.Treeview(frame_Inspection_graphical)
-        column_list_account = ["Epoch", "Loss"]
-        tv1['columns'] = column_list_account
-        tv1["show"] = "headings"  # removes empty column
-        for column in column_list_account:
-            tv1.heading(column, text=column)
-            tv1.column(column, width=50)
-        tv1.place(relheight=1, relwidth=0.995)
-        treescroll = tk.Scrollbar(frame_Inspection_graphical)
-        treescroll.configure(command=tv1.yview)
-        tv1.configure(yscrollcommand=treescroll.set)
-        treescroll.grid(column=5, row=1)
-        """
+        Main Operation Buttons
 
         """
-        Parameters frame component (Left frame)
-        frameParameters
+
+        quitEverything = ttk.Button(self, text="Quit", command=lambda: sys.exit())
+        quitEverything.place(rely=0.01, relx=0.8, height=50, width=100)
+
+        startTrainingButton = ttk.Button(self, text="Start Training  ", command=lambda: training_Run())
+        startTrainingButton.place(rely=0.01, relx=0.6, height=50, width=100)
+
+        startPreprocessButton = ttk.Button(self, text="Start Pre-Processing  ", command=lambda: preprocess_Run())
+        startPreprocessButton.place(rely=0.01, relx=0.5, height=50, width=100)
+
+        startEvaluationButton = ttk.Button(self, text="Evaluation  ", command=lambda: evalutation_Run())
+        startEvaluationButton.place(rely=0.01, relx=0.7, height=50, width=100)
+
+        """
+
+        Inputs of Parameters
+
         """
 
         ImWidth_var = tk.IntVar()
@@ -203,68 +212,6 @@ class Classification(GUI):  # inherits from the GUI class
         class_penalty_format.grid(row=17, column=2, sticky="W")
         class_penalty_entry.grid(row=17, column=1, ipadx=settingEntryLength)
         class_penalty_entry.insert(END, "1.0, 1.0")
-
-        """
-        Setting frame components (Right Top frame)
-        frameSettings
-        """
-        # CPU or GPU, Runtime. 1=CPU, 2=GPU
-        Runtime_var = tk.IntVar()
-        R1 = tk.Radiobutton(frameSettings, text="Use CPU", variable=Runtime_var, value=1, bg=backgroundColor)
-        R1.grid(row=0, column=0)
-        R2 = tk.Radiobutton(frameSettings, text="Use GPU", variable=Runtime_var, value=2, bg=backgroundColor)
-        R2.grid(row=0, column=1)
-
-        # Directory path
-        # directory will be stored in sem-global variable *_path
-        # and used in defining operational variables
-        ImageDirDirectory_path = StringVar()
-        PreprocessDirDirectory_path = StringVar()
-        ModelDirDirectory_path = StringVar()
-
-        def ImageDirDirectory():
-            path = filedialog.askdirectory(initialdir="/", title="Select folder", )
-            ImageDirDirectory_path.set(path)
-            ImageDirGotLabel.config(text=path)
-
-        ImageDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'),
-                                    bg=("%s" % dir_color))
-        ImageDirGotLabel.grid(row=1, column=1)
-        ImageDirButton = tk.Button(frameSettings, text="Image Directory", command=lambda: ImageDirDirectory())
-        ImageDirButton.grid(row=1, column=0)
-
-        def PreprocessDirDirectory():
-            path = filedialog.askdirectory(initialdir="/", title="Select folder", )
-            PreprocessDirDirectory_path.set(path)
-            PreprocessDirGotLabel.config(text=path)
-
-        PreprocessDirButton = tk.Button(frameSettings, text="Preprocess Directory",
-                                        command=lambda: PreprocessDirDirectory())
-        PreprocessDirButton.grid(row=2, column=0)
-        PreprocessDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
-        PreprocessDirGotLabel.grid(row=2, column=1)
-
-        def ModelDirDirectory():
-            path = filedialog.askdirectory(initialdir="/", title="Select folder", )
-            ModelDirDirectory_path.set(path)
-            ModelDirGotLabel.config(text=path)
-
-        ModelDirButton = tk.Button(frameSettings, text="Model Directory", command=lambda: ModelDirDirectory())
-        ModelDirButton.grid(row=3, column=0)
-        ModelDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
-        ModelDirGotLabel.grid(row=3, column=1)
-
-        # Dropdown list for pretrained model
-        PretrainedModelList = ["classifier_enhanced", "classifier_compact"]
-        PretrainedModelList_variable = tk.StringVar()
-        PretrainedModelList_variable.set(PretrainedModelList[0])
-        dropList = tk.OptionMenu(frameSettings, PretrainedModelList_variable, *PretrainedModelList)
-
-        dropList.config(width=20, font=('calibre', 10, 'bold'), bg=dir_color)
-        dropList.grid(row=5, column=1)
-        dropListLabel = tk.Label(frameSettings, text="Pretrained model: ", font=('calibre', 10, 'bold'),
-                                 bg=backgroundColor)
-        dropListLabel.grid(row=5, column=0)
 
         ###############################################################################################################
         ###########################################Augmentation########################################################
@@ -411,7 +358,89 @@ class Classification(GUI):  # inherits from the GUI class
         ClassIDsNoOrientation_label.grid(row=10, column=0, sticky="W")
         ClassIDsNoOrientation_entry.grid(row=10, column=1, ipadx=settingEntryLength)
 
-        # ClassIDsNoOrientation_entry.insert(0, '0')
+        """
+        
+        Runtime, 1=CPU, 2=GPU
+        
+        """
+
+        Runtime_var = tk.IntVar()
+        R1 = tk.Radiobutton(frameSettings, text="Use CPU", variable=Runtime_var, value=1, bg=backgroundColor)
+        R1.grid(row=0, column=0)
+        R2 = tk.Radiobutton(frameSettings, text="Use GPU", variable=Runtime_var, value=2, bg=backgroundColor)
+        R2.grid(row=0, column=1)
+
+        """
+
+        Folder Directories
+        
+        Directory path
+        
+        directory will be stored in sem-global variable *_path
+        
+        and used in defining operational variables
+
+        """
+
+        ImageDirDirectory_path = StringVar()
+        PreprocessDirDirectory_path = StringVar()
+        ModelDirDirectory_path = StringVar()
+
+        def ImageDirDirectory():
+            path = filedialog.askdirectory(initialdir="/", title="Select folder", )
+            ImageDirDirectory_path.set(path)
+            ImageDirGotLabel.config(text=path)
+
+        ImageDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'),
+                                    bg=("%s" % dir_color))
+        ImageDirGotLabel.grid(row=1, column=1)
+        ImageDirButton = tk.Button(frameSettings, text="Image Directory", command=lambda: ImageDirDirectory())
+        ImageDirButton.grid(row=1, column=0)
+
+        def PreprocessDirDirectory():
+            path = filedialog.askdirectory(initialdir="/", title="Select folder", )
+            PreprocessDirDirectory_path.set(path)
+            PreprocessDirGotLabel.config(text=path)
+
+        PreprocessDirButton = tk.Button(frameSettings, text="Preprocess Directory",
+                                        command=lambda: PreprocessDirDirectory())
+        PreprocessDirButton.grid(row=2, column=0)
+        PreprocessDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
+        PreprocessDirGotLabel.grid(row=2, column=1)
+
+        def ModelDirDirectory():
+            path = filedialog.askdirectory(initialdir="/", title="Select folder", )
+            ModelDirDirectory_path.set(path)
+            ModelDirGotLabel.config(text=path)
+
+        ModelDirButton = tk.Button(frameSettings, text="Model Directory", command=lambda: ModelDirDirectory())
+        ModelDirButton.grid(row=3, column=0)
+        ModelDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
+        ModelDirGotLabel.grid(row=3, column=1)
+
+        """
+        
+        Drop List for Pretrained Models
+
+        """
+
+        PretrainedModelList = ["classifier_enhanced", "classifier_compact"]
+        PretrainedModelList_variable = tk.StringVar()
+        PretrainedModelList_variable.set(PretrainedModelList[0])
+        dropList = tk.OptionMenu(frameSettings, PretrainedModelList_variable, *PretrainedModelList)
+
+        dropList.config(width=20, font=('calibre', 10, 'bold'), bg=dir_color)
+        dropList.grid(row=5, column=1)
+        dropListLabel = tk.Label(frameSettings, text="Pretrained model: ", font=('calibre', 10, 'bold'),
+                                 bg=backgroundColor)
+        dropListLabel.grid(row=5, column=0)
+
+        """
+
+        Labels for Matrix
+
+        """
+
         mean_precision_label = tk.Label(frame_Inspection_stats,
                                         font=('calibre', 10, 'bold'), bg=backgroundColor, fg='blue4')
         mean_recall_label = tk.Label(frame_Inspection_stats,
@@ -422,6 +451,24 @@ class Classification(GUI):  # inherits from the GUI class
         mean_precision_label.pack(side=tk.TOP)
         mean_recall_label.pack(side=tk.TOP)
         mean_f_score_label.pack(side=tk.TOP)
+
+        """
+
+        Progress Indication
+
+        """
+        preProcessingText = "Pre-Process is on going..."
+        preProcessingStopText = "Pre-Process Finished!"
+        evaluationText = "Evaluating Results..."
+        pbar = Progressbar(frameBot, mode='indeterminate', length=100)
+        pre_processingLabel = tk.Label(frameBot, font=('calibre', 10, 'bold'), bg=backgroundColor)
+        pre_processingLabel.place(relx=0.81)
+
+        """
+
+        Methods 
+
+        """
 
         def startAugmentation():
             AugmentationPercentage = int(AugmentationPercentage_entry.get())
@@ -454,6 +501,7 @@ class Classification(GUI):  # inherits from the GUI class
         def startPreproc():
 
             AugEnable = AugEnable_var.get()
+
             if AugEnable == 2:
                 aug_call.set_input_control_param_by_name('AugmentationPercentage', 0)
                 aug_call.set_input_control_param_by_name('Rotation', 0)
@@ -466,19 +514,11 @@ class Classification(GUI):  # inherits from the GUI class
                 aug_call.set_input_control_param_by_name('IgnoreDirection', 'false')
                 aug_call.set_input_control_param_by_name('ClassIDsNoOrientationExist', 'false')
                 aug_call.set_input_control_param_by_name('ClassIDsNoOrientation', [])
-
                 aug_call.execute()
+
             elif AugEnable == 1:
                 startAugmentation()
 
-            """""
-            prepare_for_training (InitialLearningRate, lr_change, ChangeLearningRateEpochs, \
-                      BestModelBaseName, FinalModelBaseName, ExampleDataDir, \
-                      ModelFileName, Momentum, BatchSize, WeightPrior, NumEpochs, \
-                      EvaluationIntervalEpochs, GenParamName_augment, GenParamValue_augment, \
-                      Class_Penalty, DLDeviceType, RawImageBaseFolder, ImageWidth, ImageHeight, \
-                      ImageNumChannels, DLModelHandle, DLDataset, TrainParam)
-                      """
             GenParamName_augment = aug_call.get_output_control_param_by_name('GenParamName_augment')
             GenParamValue_augment = aug_call.get_output_control_param_by_name('GenParamValue_augment')
 
@@ -535,13 +575,10 @@ class Classification(GUI):  # inherits from the GUI class
                                                             os.path.join(ModelDir, 'best_dl_model_classification'))
             preprocess_call.set_input_control_param_by_name('FinalModelBaseName',
                                                             os.path.join(ModelDir, 'final_dl_model_classification'))
-
             preprocess_call.set_input_control_param_by_name('ImageWidth', ImWidth)
             preprocess_call.set_input_control_param_by_name('ImageHeight', ImHeight)
             preprocess_call.set_input_control_param_by_name('ImageNumChannels', ImChannel)
-
             preprocess_call.set_input_control_param_by_name('ModelFileName', PretrainedModel)
-
             preprocess_call.set_input_control_param_by_name('BatchSize', int(BatchSize))
             preprocess_call.set_input_control_param_by_name('InitialLearningRate', float(InitialLearningRate))
             preprocess_call.set_input_control_param_by_name('Momentum', float(Momentum))
@@ -552,12 +589,10 @@ class Classification(GUI):  # inherits from the GUI class
             preprocess_call.set_input_control_param_by_name('WeightPrior', float(WeightPrior))
             preprocess_call.set_input_control_param_by_name('EvaluationIntervalEpochs', 1)
             preprocess_call.set_input_control_param_by_name('Class_Penalty', Class_Penalty)
-
             preprocess_call.set_input_control_param_by_name('GenParamName_augment', GenParamName_augment)
             preprocess_call.set_input_control_param_by_name('GenParamValue_augment', GenParamValue_augment)
 
             preprocess_call.execute()
-
 
         def startTraining():
             DLDataset = preprocess_call.get_output_control_param_by_name('DLDataset')
@@ -570,13 +605,6 @@ class Classification(GUI):  # inherits from the GUI class
             training_call.set_input_control_param_by_name('StartEpoch', 0)
 
             training_call.execute()
-
-        # a brainless method of re-running training
-        # create multiple threads pointing to same function.
-        # use a thread once user press training
-        # thread will be closed by join() once done, to save resource
-        # need to adjust number of threads according to actual need
-
 
         def startEvaluation():
             EvalBatchSize = 1
@@ -592,28 +620,16 @@ class Classification(GUI):  # inherits from the GUI class
             output_EvalResults = evaluation_call.get_output_control_param_by_name('EvaluationResult')
             confusion_matrix_tuple = ha.get_dict_tuple(output_EvalResults, 'absolute_confusion_matrix')
             confusion_matrix_List = ha.get_full_matrix(confusion_matrix_tuple)
-
             values_inside_global = ha.get_dict_tuple(output_EvalResults, 'global')
             mean_precision = ha.get_dict_tuple(values_inside_global, 'mean_precision')
             mean_recall = ha.get_dict_tuple(values_inside_global, 'mean_recall')
             mean_f_score = ha.get_dict_tuple(values_inside_global, 'mean_f_score')
 
-            listout = [confusion_matrix_List,mean_precision,mean_recall,mean_f_score]
+            listout = [confusion_matrix_List, mean_precision, mean_recall, mean_f_score]
 
             return listout
 
-
-
-        preProcessingText = "Pre-Process is on going..."
-        preProcessingStopText = "Pre-Process Finished!"
-        evaluationText = "Evaluating Results..."
-        pbar = Progressbar(frameBot, mode='indeterminate', length=100)
-        pre_processingLabel = tk.Label(frameBot, font=('calibre', 10, 'bold'), bg=backgroundColor)
-        pre_processingLabel.place(relx=0.81)
-
-
         def preprocess_Run():
-
 
             pbar.place(relx=0.93)
             pbar.start()
@@ -642,7 +658,6 @@ class Classification(GUI):  # inherits from the GUI class
                 messagebox.showinfo('Finished', "Training finished, thank you.")
                 proc2.join()
             print(threading.active_count())
-
 
         def evalutation_Run():
             pbar.place(relx=0.93)
@@ -705,19 +720,3 @@ class Classification(GUI):  # inherits from the GUI class
             mean_precision_label.config(text='Mean Precision:\n' + str(mean_precision) + '\n\n', )
             mean_recall_label.config(text='Mean Recall:\n' + str(mean_recall) + '\n\n')
             mean_f_score_label.config(text='Mean F1 Score:\n' + str(mean_f_score) + '\n\n')
-
-
-
-
-
-        quitEverything = ttk.Button(self, text="Quit", command=lambda: sys.exit())
-        quitEverything.place(rely=0.01, relx=0.8, height=50, width=100)
-
-        startTrainingButton = ttk.Button(self, text="Start Training  ", command=lambda: training_Run())
-        startTrainingButton.place(rely=0.01, relx=0.6, height=50, width=100)
-
-        startPreprocessButton = ttk.Button(self, text="Start Pre-Processing  ", command=lambda: preprocess_Run())
-        startPreprocessButton.place(rely=0.01, relx=0.5, height=50, width=100)
-
-        startEvaluationButton = ttk.Button(self, text="Evaluation  ", command=lambda: evalutation_Run())
-        startEvaluationButton.place(rely=0.01, relx=0.7, height=50, width=100)

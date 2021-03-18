@@ -38,8 +38,13 @@ class ObjectDetection(GUI):
         styles = SettingVariables.frame_styles
         dir_color = SettingVariables.dirColor
         backgroundColor = SettingVariables.backgroundColor
-        # initialise frames
-        # frameSettings, frame Parameters,frame_Inspection_graphical, frameTop
+
+        """
+
+        Frames
+
+        """
+
         frame_Parameters = tk.LabelFrame(self, styles, text="Parameters")
         frame_Parameters.place(rely=0.07, relx=0.02, height=300, width=600)
 
@@ -65,9 +70,32 @@ class ObjectDetection(GUI):
                                         bg=backgroundColor,fg='dark red')
         ObjectDetection_label.place(rely=0, relx=0.1, height=50)
 
+        """
+        
+        Main Operation Buttons
+        
+        """
+
+        quitEverything = ttk.Button(self, text="Quit", command=lambda: sys.exit())
+        quitEverything.place(rely=0.01, relx=0.8, height=50, width=100)
+
+        #startTrainingButton = ttk.Button(self, text="Start Training  ", command=lambda: training_Run())
+        #startTrainingButton.place(rely=0.01, relx=0.6, height=50, width=100)
+
+        #startPreprocessButton = ttk.Button(self, text="Start Pre-Processing  ", command=lambda: preprocess_Run())
+        #startPreprocessButton.place(rely=0.01, relx=0.5, height=50, width=100)
+
+        #startEvaluationButton = ttk.Button(self, text="Evaluation  ", command=lambda: evalutation_Run())
+        #startEvaluationButton.place(rely=0.01, relx=0.7, height=50, width=100)
+
+        """
+
+        Folder Directories
+
+        """
         RootDirectory_path = StringVar()
         HalconImageDirectory_path = StringVar()
-        #ModelDirDirectory_path = StringVar()
+
 
         def ImageDirDirectory():
             path = filedialog.askdirectory(initialdir="/", title="Select folder", )
@@ -91,9 +119,12 @@ class ObjectDetection(GUI):
         HalconImageDirGotLabel = tk.Label(frameSettings, width=47, font=('calibre', 10, 'bold'), bg=dir_color)
         HalconImageDirGotLabel.grid(row=2, column=1)
 
+        """
 
+        Dropdown list for pretrained model
 
-        # Dropdown list for pretrained model
+        """
+
         PretrainedModelList = ["classifier_enhanced", "classifier_compact"]
         PretrainedModelList_variable = tk.StringVar()
         PretrainedModelList_variable.set(PretrainedModelList[0])
@@ -104,6 +135,11 @@ class ObjectDetection(GUI):
                                  bg=backgroundColor)
         dropListLabel.grid(row=5, column=0)
 
+        """
+
+        Input for Parameters
+
+        """
         ImWidth_var = tk.IntVar()
         ImHeight_var = tk.IntVar()
         ImChannel_var = tk.IntVar()
@@ -222,9 +258,11 @@ class ObjectDetection(GUI):
 
         """
         Setting frame components (Right Top frame)
-        frameSettings
+        
+        CPU or GPU, Runtime. 1=CPU, 2=GPU
+        
         """
-        # CPU or GPU, Runtime. 1=CPU, 2=GPU
+
         Runtime_var = tk.IntVar()
         R1 = tk.Radiobutton(frameSettings, text="Use CPU", variable=Runtime_var, value=1, bg=backgroundColor)
         R1.grid(row=0, column=0)
