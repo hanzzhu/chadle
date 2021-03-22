@@ -31,7 +31,7 @@ engine.set_procedure_path(
 program = ha.HDevProgram('C:/Users/930415/Desktop/DL_train_CL_seagate.hdev')
 aug_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'augment_prepare'))
 preprocess_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'prepare_for_training'))
-training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_PK'))
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_CE'))
 evaluation_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'Evaluation'))
 
 
@@ -732,3 +732,69 @@ class Classification(GUI):  # inherits from the GUI class
             mean_precision_label.config(text='Mean Precision:\n' + str(mean_precision) + '\n\n', )
             mean_recall_label.config(text='Mean Recall:\n' + str(mean_recall) + '\n\n')
             mean_f_score_label.config(text='Mean F1 Score:\n' + str(mean_f_score) + '\n\n')
+
+        def stop():
+            """Enable scanning by setting the global flag to True."""
+            global running
+            running = True
+            FileHandle = ha.open_file('mutex.dat', 'output')
+
+            ha.fwrite_string(FileHandle, 1)
+            # close_file(FileHandle)
+
+        stopbutton = ttk.Button(self, text="stop  ", command=lambda: stop())
+        stopbutton.place(rely=0.01, relx=0.4, height=30, width=30)
+
+
+        def control_execution():
+            idx = 0  # loop index
+
+            def stop():
+                """Enable scanning by setting the global flag to True."""
+                global running
+                running = True
+                FileHandle = ha.open_file('mutex.dat', 'output')
+
+                ha.fwrite_string(FileHandle, 1)
+                # close_file(FileHandle)
+
+            def resume():
+                """Stop scanning by setting the global flag to False."""
+                global running
+                running = False
+                FileHandle = ha.open_file('mutex.dat', 'output')
+                ha.fwrite_string(FileHandle, 0)
+                # close_file(FileHandle)
+
+            def doSomething():
+                root.destroy()
+
+            def on_exit():
+                """When you click to exit, this function is called"""
+                if messagebox.askyesno("Exit", "Do you want to quit the application?"):
+                    root.destroy()
+                    FileHandle = ha.open_file('mutex.dat', 'output')
+                    ha.fwrite_string(FileHandle, 3)
+
+            root = Tk.Tk()
+            root.title("Contol execution")
+            root.protocol('WM_DELETE_WINDOW', on_exit)  # root is your root window
+            # root.geometry('200x250 + 400 + 300')
+
+            start = Tk.Button(root, text="Stop", command=stop)
+            stop = Tk.Button(root, text="Resume", command=resume)
+
+            start.grid()
+            stop.grid()
+
+            # open_file(), fwrite_line() and close_file() to modify the 'mutex.dat'
+
+            while True:
+                if idx % 500 == 0:
+                    root.update()
+
+                if running:
+                    idx += 1
+
+                else:
+                    idx += 1
