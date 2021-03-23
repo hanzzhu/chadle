@@ -5,17 +5,7 @@ from functools import wraps
 
 from flask import Flask, render_template, jsonify, request
 import webview
-
-
-def initialize():
-    # perform heavy stuff here
-    return True
-
-
-def do_stuff():
-    # do whatever you need to do
-    response = "This is response from Python backend"
-    return response
+import app
 
 gui_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'gui')  # development path
 
@@ -60,7 +50,7 @@ def initialize():
     Perform heavy-lifting initialization asynchronously.
     :return:
     '''
-    can_start = initialize()
+    can_start = app.initialize()
 
     if can_start:
         response = {
@@ -113,7 +103,7 @@ def open_url():
 @server.route('/do/stuff', methods=['POST'])
 @verify_token
 def do_stuff():
-    result = do_stuff()
+    result = app.do_stuff()
 
     if result:
         response = {'status': 'ok', 'result': result}

@@ -1,7 +1,7 @@
 from Halcon_Python.SettingVariables import SettingVariables
 import numpy
 from Halcon_Python.GUI import GUI
-from makeCM import make_confusion_matrix, divide_chunks, figure
+from Halcon_Python.makeCM import make_confusion_matrix, divide_chunks, figure
 import tkinter as tk
 from tkinter.ttk import Progressbar
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -14,7 +14,7 @@ import os
 from mttkinter import *
 import halcon as ha
 
-from makeCM import make_confusion_matrix
+from Halcon_Python.makeCM import make_confusion_matrix
 
 """
 

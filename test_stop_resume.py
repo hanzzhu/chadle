@@ -242,6 +242,7 @@ if __name__ == '__main__':
     x = threading.Thread(target=control_execution)
     x.start()
 
+    FileHandle = ha.open_file('mutex.dat', 'output')
     # Augmentation
     proc_name_augment = 'augment_prepare'
     proc_augment_preparation = augment_prepare(proc_name_augment)
