@@ -18,34 +18,38 @@ running = True  # Global flag
 
 ###### Input/output directories ######
 """""
-ExampleDataDir = 'C:/Users/930415/Desktop/NTBW_Image Analytics/training_findinghub'
+ExampleDataDir = 'classify_pill_defects_data'
 ModelFileName = 'pretrained_dl_classifier_compact.hdl'
-DataDirectory = ExampleDataDir + '/dldataset_fipg_960x1024'
+DataDirectory = ExampleDataDir + '/dldataset_pill_300x300'
 DLDatasetFileName = DataDirectory + '/dl_dataset.hdict'
 DLPreprocessParamFileName = DataDirectory + '/dl_preprocess_param.hdict'
-BestModelBaseName = 'C:/Users/930415/Desktop/NTBW_Image Analytics/models_hub' + '/best_dl_model_classification'
-FinalModelBaseName = 'C:/Users/930415/Desktop/NTBW_Image Analytics/models_hub' + '/final_dl_model_classification'
-"""
-ImageWidth = str(960)
-ImageHeight = str(1024)
-
-# Main training directory
-RootDir = 'C:/Users/930415/Desktop/NTBW_Image Analytics/'
-MainDir = RootDir + 'training_findinghub'
-# Path to the image directory.
-HalconImageDir = 'C:/Users/930415/Desktop/NTBW_Image Analytics/TapeRouting_Pictures'
-
-ExampleDataDir = MainDir
-ModelFileName = MainDir + '/pretrained_dl_model_detection.hdl'
-DataDirectory = ExampleDataDir + '/dldataset_fipg_' + ImageWidth + 'x' + ImageHeight
-DLDatasetFileName = DataDirectory + '/dl_dataset.hdict'
-DLPreprocessParamFileName = MainDir + '/dl_preprocess_param.hdict'
 BestModelBaseName = ExampleDataDir + '/best_dl_model_classification'
 FinalModelBaseName = ExampleDataDir + '/final_dl_model_classification'
+"""
+ImageWidth = str(100)
+ImageHeight = str(100)
+
+# Main training directory
+#RootDir = 'C:/Users/930415/Desktop/NTBW_Image Analytics/'
+
+
+ModelDir = 'C:/Users/930415/Desktop/HK/model'
+# Path to the image directory.
+HalconImageDir = 'C:/Users/930415/Desktop/HK/animal'
+
+
+ModelFileName = ModelDir + '/pretrained_dl_model_detection.hdl'
+DataDirectory = 'C:/Users/930415/Desktop/HK/Split/dldataset_100x100'
+ExampleDataDir = DataDirectory
+DLDatasetFileName = DataDirectory + '/dl_dataset.hdict'
+
+DLPreprocessParamFileName = DataDirectory + '/dl_preprocess_param.hdict'
+BestModelBaseName = ModelDir + '/best_dl_model_classification'
+FinalModelBaseName = ModelDir + '/final_dl_model_classification'
 
 
 ###### Parameter settings ######
-BatchSize = 10
+BatchSize = 1
 InitialLearningRate = 0.005
 Momentum = 0.9
 NumEpochs = 20

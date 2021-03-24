@@ -103,7 +103,8 @@ def open_url():
 @server.route('/do/stuff', methods=['POST'])
 @verify_token
 def do_stuff():
-    result = app.do_stuff()
+    parameter = 123
+    result = app.do_stuff(parameter)
 
     if result:
         response = {'status': 'ok', 'result': result}
@@ -111,3 +112,26 @@ def do_stuff():
         response = {'status': 'error'}
 
     return jsonify(response)
+
+
+@server.route('/submitname', methods=['POST'])
+@verify_token
+def submit_name():
+    user = request.form['name']
+    response = {'status': 'ok', 'name': user}
+
+
+
+    return jsonify(response)
+
+
+"""
+    user = request.form['name']
+
+    if user:
+
+        response = {'status': 'ok', 'name': user}
+    else:
+
+        response = {'status': 'error'}
+"""

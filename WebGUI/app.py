@@ -33,7 +33,7 @@ def initialize():
 
 
 
-def do_stuff():
+def do_stuff(parameter):
     engine = ha.HDevEngine()
     engine.set_procedure_path('C:/MVTec/Halcon-20.11-Progress/procedures')
     engine.set_procedure_path(
@@ -67,7 +67,7 @@ def do_stuff():
                                                     os.path.join('C:/Users/930415/Desktop/HK/model', 'best_dl_model_classification'))
     preprocess_call.set_input_control_param_by_name('FinalModelBaseName',
                                                     os.path.join('C:/Users/930415/Desktop/HK/model', 'final_dl_model_classification'))
-    preprocess_call.set_input_control_param_by_name('ImageWidth', 100)
+    preprocess_call.set_input_control_param_by_name('ImageWidth', parameter)
     preprocess_call.set_input_control_param_by_name('ImageHeight', 100)
     preprocess_call.set_input_control_param_by_name('ImageNumChannels', 3)
     preprocess_call.set_input_control_param_by_name('ModelFileName', 'pretrained_dl_' + 'classifier_enhanced' + '.hdl')
