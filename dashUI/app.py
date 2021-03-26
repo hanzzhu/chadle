@@ -1,81 +1,113 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import numpy as np
-import pandas as pd
-from dash.dependencies import Input, Output
-import plotly.express as px
+from dash.dependencies import Input, Output, State
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-# make a sample data frame with 6 columns
-df = pd.DataFrame({"Col " + str(i+1): np.random.rand(30) for i in range(6)})
-
 app.layout = html.Div([
-    html.Div(
-        dcc.Graph(id='g1', config={'displayModeBar': False}),
-        className='four columns'
+    html.H1('Chadle ', style={
+        'textAlign': 'left',
+        'color': 'Black'
+    }),
+    html.Div(["Project Name:", dcc.Dropdown(
+        id='ProjectName',
+        options=[{'label': i, 'value': i} for i in ['Animals(test)', 'NTBW Image Analytics']],
+        value='Animals(test)'
     ),
-    html.Div(
-        dcc.Graph(id='g2', config={'displayModeBar': False}),
-        className='four columns'
+              "Training Device:", dcc.RadioItems(
+            id='Runtime',
+            options=[{'label': i, 'value': i} for i in ['CPU', 'GPU']],
+            value='GPU',
+            labelStyle={'display': 'inline-block'}
         ),
-    html.Div(
-        dcc.Graph(id='g3', config={'displayModeBar': False}),
-        className='four columns'
-    )
-], className='row')
+              "Pretrained Model:", dcc.Dropdown(
+            id='PretrainedModel',
+            options=[{'label': i, 'value': i} for i in ["classifier_enhanced", "classifier_compact"]],
+            value='classifier_compact'
+        ),
+              ],
+             style={'width': '48%', 'display': 'inline-block'}),
+    html.Br(),
+    html.Br(),
 
-def get_figure(df, x_col, y_col, selectedpoints, selectedpoints_local):
+    html.Div([
+        html.Div([
+            html.Label('Image Width'),
+            dcc.Input(id='ImWidth', value='500', type='number', min=0, step=1, ),
+            html.Label('Image Height'),
+            dcc.Input(id='ImHeight', value='300', type='number', min=0, step=1, ),
+            html.Label('Image Channel'),
+            dcc.Input(id='ImChannel', value='3', type='number', min=0, step=1, ),
+            html.Label('Batch Size'),
+            dcc.Input(id='BatchSize', value='16', type='number', min=0, step=1, ),
+            html.Label('Initial Learning Rate'),
+            dcc.Input(id='InitialLearningRate', value='0.01', type='number', min=0, step=0.01, ),
+            html.Label('Momentum'),
+            dcc.Input(id='Momentum', value='0.9', type='number', min=0, step=0.01, ),
+            html.Label('Number of Epochs'),
+            dcc.Input(id='NumEpochs', value='500', type='number', min=0, step=1, ),
+            html.Label('Change Learning Rate @ Epochs'),
+            dcc.Input(id='ChangeLearningRateEpochs', value='5,10,100', type='text'),
+            html.Label('Learning Rate Schedule'),
+            dcc.Input(id='lr_change', value='0.01,0.1,0.5', type='text'),
+            html.Label('Regularisation Constant'),
+            dcc.Input(id='WeightPrior', value='0.9', type='number', min=0, step=0.01, ),
+            html.Label('Class Penalty'),
+            dcc.Input(id='class_penalty', value='0.01,0.1,0.5', type='text'),
+        ],
+            style={'width': '20%', 'display': 'inline-block'}),
 
-    if selectedpoints_local and selectedpoints_local['range']:
-        ranges = selectedpoints_local['range']
-        selection_bounds = {'x0': ranges['x'][0], 'x1': ranges['x'][1],
-                            'y0': ranges['y'][0], 'y1': ranges['y'][1]}
-    else:
-        selection_bounds = {'x0': np.min(df[x_col]), 'x1': np.max(df[x_col]),
-                            'y0': np.min(df[y_col]), 'y1': np.max(df[y_col])}
+        html.Div([
+            html.Label('Augmentation Percentage'),
+            dcc.Input(id='AugmentationPercentage', value='100', type='number', min=0, max=100, step=1, ),
+            html.Label('Rotation'),
+            dcc.Input(id='Rotation', value='90', type='number', min=-180, max=180, step=90, ),
+            html.Label('Mirror'),
+            dcc.Input(id='mirror', value='off', type='text', ),
+            html.Label('Brightness Variation'),
+            dcc.Input(id='BrightnessVariation', value='1', type='number', min=1, max=100, step=1, ),
+            html.Label('Initial Learning Rate'),
+            dcc.Input(id='BrightnessVariationSpot', value='0.01', type='number', min=0, step=0.01, ),
+            html.Label('Momentum'),
+            dcc.Input(id='CropPercentage', value='0.9', type='number', min=0, step=0.01, ),
+            html.Label('Number of Epochs'),
+            dcc.Input(id='CropPixel', value='500', type='number', min=0, step=1, ),
+            html.Label('Change Learning Rate @ Epochs'),
+            dcc.Input(id='RotationRange', value='5,10,100', type='text'),
+            html.Label('Learning Rate Schedule'),
+            dcc.Input(id='IgnoreDirection', value='0.01,0.1,0.5', type='text'),
+            html.Label('Regularisation Constant'),
+            dcc.Input(id='ClassIDsNoOrientationExist', value='0.9', type='number', min=0, step=0.01, ),
+            html.Label('Class Penalty'),
+            dcc.Input(id='ClassIDsNoOrientation', value='0.01,0.1,0.5', type='text'),
+        ],
+            style={'width': '20%', 'float': 'left', 'display': 'inline-block'}),
 
-    # set which points are selected with the `selectedpoints` property
-    # and style those points with the `selected` and `unselected`
-    # attribute. see
-    # https://medium.com/@plotlygraphs/notes-from-the-latest-plotly-js-release-b035a5b43e21
-    # for an explanation
-    fig = px.scatter(df, x=df[x_col], y=df[y_col], text=df.index)
+    ]),
 
-    fig.update_traces(selectedpoints=selectedpoints,
-                      customdata=df.index,
-                      mode='markers+text', marker={ 'color': 'rgba(0, 116, 217, 0.7)', 'size': 20 }, unselected={'marker': { 'opacity': 0.3 }, 'textfont': { 'color': 'rgba(0, 0, 0, 0)' }})
+    html.Br(),
+    html.Br(),
+    html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
+    html.Div(id='output-state')
+])
 
-    fig.update_layout(margin={'l': 20, 'r': 0, 'b': 15, 't': 5}, dragmode='select', hovermode=False)
 
-    fig.add_shape(dict({'type': 'rect',
-                        'line': { 'width': 1, 'dash': 'dot', 'color': 'darkgrey' }},
-                       **selection_bounds))
-    return fig
-
-# this callback defines 3 figures
-# as a function of the intersection of their 3 selections
-@app.callback(
-    Output('g1', 'figure'),
-    Output('g2', 'figure'),
-    Output('g3', 'figure'),
-    Input('g1', 'selectedData'),
-    Input('g2', 'selectedData'),
-    Input('g3', 'selectedData')
-)
-def callback(selection1, selection2, selection3):
-    selectedpoints = df.index
-    for selected_data in [selection1, selection2, selection3]:
-        if selected_data and selected_data['points']:
-            selectedpoints = np.intersect1d(selectedpoints,
-                [p['customdata'] for p in selected_data['points']])
-
-    return [get_figure(df, "Col 1", "Col 2", selectedpoints, selection1),
-            get_figure(df, "Col 3", "Col 4", selectedpoints, selection2),
-            get_figure(df, "Col 5", "Col 6", selectedpoints, selection3)]
+@app.callback(Output('output-state', 'children'),
+              Input('submit-button-state', 'n_clicks'),
+              State('ProjectName', 'value'),
+              State('Runtime', 'value'),
+              State('PretrainedModel', 'value')
+              )
+def update_output(n_clicks, ProjectName, Runtime, PretrainedModel):
+    return u'''
+        The Button has been pressed {} times,\n
+        Project Name is "{}",\n
+        Training Device is "{}",\n
+        Pretrained model is "{}",\n
+    '''.format(n_clicks, ProjectName, Runtime, PretrainedModel)
 
 
 if __name__ == '__main__':
