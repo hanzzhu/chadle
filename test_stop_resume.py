@@ -31,19 +31,20 @@ ImageHeight = str(100)
 
 # Main training directory
 #RootDir = 'C:/Users/930415/Desktop/NTBW_Image Analytics/'
+RootDir = 'C:/Users/930415/Desktop/Chadle_Project'
+ProjectDir = RootDir +'/'+ 'Animals'
 
-
-ModelDir = 'C:/Users/930415/Desktop/HK/model'
-# Path to the image directory.
-HalconImageDir = 'C:/Users/930415/Desktop/HK/animal'
-
-
+ModelDir = ProjectDir+ '/Model'
 ModelFileName = ModelDir + '/pretrained_dl_model_detection.hdl'
-DataDirectory = 'C:/Users/930415/Desktop/HK/Split/dldataset_100x100'
-ExampleDataDir = DataDirectory
-DLDatasetFileName = DataDirectory + '/dl_dataset.hdict'
+# Path to the image directory.
+HalconImageDir = ProjectDir+ '/Image'
 
-DLPreprocessParamFileName = DataDirectory + '/dl_preprocess_param.hdict'
+SplitDir = ProjectDir+ '/Split'
+
+ExampleDataDir = SplitDir+'/dldataset_100x100'
+DLDatasetFileName = ExampleDataDir + '/dl_dataset.hdict'
+
+DLPreprocessParamFileName = ExampleDataDir + '/dl_preprocess_param.hdict'
 BestModelBaseName = ModelDir + '/best_dl_model_classification'
 FinalModelBaseName = ModelDir + '/final_dl_model_classification'
 
@@ -264,3 +265,5 @@ if __name__ == '__main__':
 
     # Training
     proc_training = training(DLDataset, DLModelHandle, TrainParam)
+
+
