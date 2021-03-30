@@ -17,7 +17,7 @@ def pre_process(ProjectName):
         ProjectDir = RootDir + '/' + ProjectName
 
         ModelDir = ProjectDir + '/Model'
-        ModelFileName = ModelDir + '/pretrained_dl_model_detection.hdl'
+        ModelFileName = 'pretrained_dl_classifier_enhanced.hdl'
         # Path to the image directory.
         HalconImageDir = ProjectDir + '/Image'
 
@@ -63,7 +63,7 @@ def pre_process(ProjectName):
         preprocess_call.set_input_control_param_by_name('ImageHeight', 100)
         preprocess_call.set_input_control_param_by_name('ImageNumChannels', 3)
         preprocess_call.set_input_control_param_by_name('ModelFileName',
-                                                        'pretrained_dl_' + 'classifier_enhanced' + '.hdl')
+                                                        ModelFileName)
         preprocess_call.set_input_control_param_by_name('BatchSize', 1)
         preprocess_call.set_input_control_param_by_name('InitialLearningRate', 0.1)
         preprocess_call.set_input_control_param_by_name('Momentum', 0.9)

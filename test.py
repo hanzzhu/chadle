@@ -9,8 +9,8 @@ import os
 import halcon as ha
 import threading
 import multiprocessing
-ImageWidth = 300
-ImageHeight = 300
+ImageWidth = 101
+ImageHeight = 101
 
 engine = ha.HDevEngine()
 engine.set_procedure_path('C:/MVTec/Halcon-20.11-Progress/procedures')
@@ -21,7 +21,7 @@ ProjectDict = ['Animals', 'NTBW Image Analytics']
 ProjectDir = RootDir + '/' + 'Animals'
 
 ModelDir = ProjectDir + '/Model'
-ModelFileName = ModelDir + '/pretrained_dl_model_detection.hdl'
+ModelFileName = 'pretrained_dl_classifier_enhanced.hdl'
 # Path to the image directory.
 HalconImageDir = ProjectDir + '/Image'
 

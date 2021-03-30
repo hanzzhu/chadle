@@ -116,6 +116,7 @@ app.layout = html.Div([
               State('BatchSize', 'value'),
               State('InitialLearningRate', 'value'),
               State('Momentum', 'value'),
+
               )
 def update_output(n_clicks, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel, BatchSize,
                   InitialLearningRate, Momentum, ):

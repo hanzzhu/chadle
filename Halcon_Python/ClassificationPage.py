@@ -31,7 +31,7 @@ engine.set_procedure_path(
 program = ha.HDevProgram('C:/Users/930415/Desktop/DL_train_CL_seagate.hdev')
 aug_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'augment_prepare'))
 preprocess_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'prepare_for_training'))
-training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_CE'))
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_PK'))
 evaluation_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'Evaluation'))
 
 
