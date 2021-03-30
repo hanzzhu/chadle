@@ -96,9 +96,11 @@ app.layout = html.Div([
     html.Br(),
     html.Br(),
     html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
-    html.Button(id='preprocess', n_clicks=0, children='Pre-Process'),
+    html.Button(id='preprocess_button', n_clicks=0, children='Pre-Process'),
+    html.Button(id='train_button', n_clicks=0, children='Train'),
     html.Div(id='output-state'),
-    html.Div(id='Result')
+    html.Div(id='Result'),
+    html.Div(id='Train'),
 
 ])
 
@@ -136,13 +138,29 @@ def update_output(n_clicks, ProjectName, Runtime, PretrainedModel, ImWidth, ImHe
 
 
 @app.callback(Output('Result', 'children'),
-              Input('preprocess', 'n_clicks'),
+              Input('preprocess_button', 'n_clicks'),
+              Input('train_button', 'n_clicks'),
               Input('ProjectName', 'value'))
-def preprocess(n_clicks, ProjectName):
-    if n_clicks == 0:
+def preprocess(preprocess_button, train_button, ProjectName):
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        button_id = 'Null'
+    else:
+        button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    print(button_id)
+    if button_id == 'Null':
         raise PreventUpdate
-    elif n_clicks > 0:
-        return run.select_project(ProjectName),
+    else:
+        pre_process_param = run.pre_process(ProjectName),
+        print(pre_process_param)
+        DLModelHandle = pre_process_param[0][0][0]
+        DLDataset = pre_process_param[0][1][0]
+        TrainParam = pre_process_param[0][2][0]
+
+        if button_id == 'train_button':
+            run.training(DLDataset, DLModelHandle, TrainParam)
+            return 'training is done'
 
 
 @app.server.route('/downloads')

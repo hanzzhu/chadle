@@ -17,37 +17,13 @@ from tkinter import messagebox
 running = True  # Global flag
 
 ###### Input/output directories ######
-"""""
-ExampleDataDir = 'classify_pill_defects_data'
+ExampleDataDir = 'C:/Users/930415/Desktop/Chadle_Project/Animals/Split'
 ModelFileName = 'pretrained_dl_classifier_compact.hdl'
-DataDirectory = ExampleDataDir + '/dldataset_pill_300x300'
+DataDirectory = ExampleDataDir + '/dldataset_100x100'
 DLDatasetFileName = DataDirectory + '/dl_dataset.hdict'
 DLPreprocessParamFileName = DataDirectory + '/dl_preprocess_param.hdict'
 BestModelBaseName = ExampleDataDir + '/best_dl_model_classification'
 FinalModelBaseName = ExampleDataDir + '/final_dl_model_classification'
-"""
-ImageWidth = str(100)
-ImageHeight = str(100)
-
-# Main training directory
-#RootDir = 'C:/Users/930415/Desktop/NTBW_Image Analytics/'
-RootDir = 'C:/Users/930415/Desktop/Chadle_Project'
-ProjectDir = RootDir +'/'+ 'Animals'
-
-ModelDir = ProjectDir+ '/Model'
-ModelFileName = ModelDir + '/pretrained_dl_model_detection.hdl'
-# Path to the image directory.
-HalconImageDir = ProjectDir+ '/Image'
-
-SplitDir = ProjectDir+ '/Split'
-
-ExampleDataDir = SplitDir+'/dldataset_100x100'
-DLDatasetFileName = ExampleDataDir + '/dl_dataset.hdict'
-
-DLPreprocessParamFileName = ExampleDataDir + '/dl_preprocess_param.hdict'
-BestModelBaseName = ModelDir + '/best_dl_model_classification'
-FinalModelBaseName = ModelDir + '/final_dl_model_classification'
-
 
 ###### Parameter settings ######
 BatchSize = 1
@@ -58,8 +34,8 @@ StartEpoch = 0
 EvaluationIntervalEpochs = 1
 ChangeLearningRateEpochs = [4, 8, 12]
 lr_change = [0.1, 0.01, 0.001]
-WeightPrior = 1
-Class_Penalty = []  # Each class should be assigned with a penalty value
+WeightPrior = 0.0005
+Class_Penalty = [0,0]  # Each class should be assigned with a penalty value
 
 ###### Augmentation parameter settings ######
 # The percentage of the images that are to be augmented.
@@ -247,7 +223,6 @@ if __name__ == '__main__':
     x = threading.Thread(target=control_execution)
     x.start()
 
-    FileHandle = ha.open_file('mutex.dat', 'output')
     # Augmentation
     proc_name_augment = 'augment_prepare'
     proc_augment_preparation = augment_prepare(proc_name_augment)
@@ -265,5 +240,8 @@ if __name__ == '__main__':
 
     # Training
     proc_training = training(DLDataset, DLModelHandle, TrainParam)
+
+
+
 
 

@@ -10,11 +10,10 @@ from tkinter import messagebox
 running = True  # Global flag
 
 
-def select_project(ProjectName):
+def pre_process(ProjectName):
     RootDir = 'C:/Users/930415/Desktop/Chadle_Project'
     ProjectDict = ['Animals', 'NTBW Image Analytics']
     if ProjectName in ProjectDict:
-
         ProjectDir = RootDir + '/' + ProjectName
 
         ModelDir = ProjectDir + '/Model'
@@ -31,10 +30,10 @@ def select_project(ProjectName):
         BestModelBaseName = ModelDir + '/best_dl_model_classification'
         FinalModelBaseName = ModelDir + '/final_dl_model_classification'
         program = ha.HDevProgram('C:/Users/930415/Desktop/DL_train_CL_seagate.hdev')
-        aug_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('augment_prepare'))
-        preprocess_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program,'prepare_for_training'))
-        #training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
-        #evaluation_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('Evaluation'))
+        aug_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'augment_prepare'))
+        preprocess_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'prepare_for_training'))
+        # training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
+        # evaluation_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('Evaluation'))
         aug_call.set_input_control_param_by_name('AugmentationPercentage', 0)
         aug_call.set_input_control_param_by_name('Rotation', 0)
         aug_call.set_input_control_param_by_name('Mirror', 'c')
@@ -79,6 +78,26 @@ def select_project(ProjectName):
         preprocess_call.set_input_control_param_by_name('GenParamValue_augment', GenParamValue_augment)
         preprocess_call.execute()
 
+        DLModelHandle = preprocess_call.get_output_control_param_by_name('DLModelHandle')
+        DLDataset = preprocess_call.get_output_control_param_by_name('DLDataset')
+        TrainParam = preprocess_call.get_output_control_param_by_name('TrainParam')
+
+        return DLModelHandle, DLDataset, TrainParam
+
+
+def training(DLDataset, DLModelHandle, TrainParam):
+    program = ha.HDevProgram('C:/Users/930415/Desktop/DL_train_CL_seagate.hdev')
+    training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_PK'))
+    # proc_training = ha.HDevProcedure.load_external('train_dl_model_CE')
+    # proc_call = ha.HDevProcedureCall(proc_training)
+
+    training_call.set_input_control_param_by_name('DLModelHandle', DLModelHandle)
+    training_call.set_input_control_param_by_name('DLDataset', DLDataset)
+    training_call.set_input_control_param_by_name('TrainParam', TrainParam)
+    training_call.set_input_control_param_by_name('StartEpoch', 0)
+
+    training_call.execute()
+
 
 def setup_hdev_engine():
     """Setup HDevEngine by setting procedure search paths."""
@@ -93,4 +112,3 @@ def setup_hdev_engine():
 
     # engine.set_procedure_path('E:/Customer evaluation/Seagate/HDev Engine_Python/dl_training_PK.hdpl')
     # engine.set_procedure_path('E:/Customer evaluation/Seagate/HDev Engine_Python/dl_visualization_PK.hdpl')
-
