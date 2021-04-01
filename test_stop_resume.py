@@ -39,7 +39,7 @@ Class_Penalty = [0,0]  # Each class should be assigned with a penalty value
 
 ###### Augmentation parameter settings ######
 # The percentage of the images that are to be augmented.
-AugmentationPercentage = 20  # Expects integer value in the range [0, 100]
+AugmentationPercentage = 100  # Expects integer value in the range [0, 100]
 
 # Step size for possible rotations.
 Rotation = 0  # expects values in the range [-180, 180]
@@ -213,7 +213,8 @@ def training(DLDataset, DLModelHandle, TrainParam):
     proc_call.set_input_control_param_by_name('DLModelHandle', DLModelHandle)
     proc_call.set_input_control_param_by_name('DLDataset', DLDataset)
     proc_call.set_input_control_param_by_name('TrainParam', TrainParam)
-    proc_call.set_input_control_param_by_name('StartEpoch', StartEpoch)
+    proc_call.set_input_control_param_by_name('StartEpoch', 0)
+    proc_call.set_input_control_param_by_name('Display_Ctrl', 1)
 
     proc_call.execute()
 
@@ -226,14 +227,13 @@ if __name__ == '__main__':
     # Augmentation
     proc_name_augment = 'augment_prepare'
     proc_augment_preparation = augment_prepare(proc_name_augment)
-
     GenParamName_augment = proc_augment_preparation[0][0]
     GenParamValue_augment = proc_augment_preparation[1][0]
 
     # Preparation
     proc_name = 'prepare_for_training'
     proc_preparation = prep_for_training(GenParamName_augment, GenParamValue_augment, proc_name)
-
+    print(proc_preparation)
     DLModelHandle = proc_preparation[0][0]
     DLDataset = proc_preparation[1][0]
     TrainParam = proc_preparation[2][0]

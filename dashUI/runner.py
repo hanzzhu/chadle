@@ -1,11 +1,10 @@
 import os
 import halcon as ha
+import json
 
-# import thread
 
-
-running = True  # Global flag
-
+with open('parameters_json.txt') as json_file:
+    ParameterDict = json.load(json_file)
 
 def pre_process(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                 BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
