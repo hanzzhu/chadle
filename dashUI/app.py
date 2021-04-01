@@ -9,7 +9,7 @@ import halcon as ha
 import json
 import run
 
-templist = {}
+templist = []
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -192,7 +192,7 @@ def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedM
             FileHandle = ha.open_file('mutex.dat', 'output')
             ha.fwrite_string(FileHandle, 0)
 
-            """""
+
             pre_process_param = run.pre_process(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                                                 BatchSize, InitialLearningRate, Momentum, NumEpochs,
                                                 ChangeLearningRateEpochs, lr_change, WeightPrior,
@@ -208,7 +208,7 @@ def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedM
             templist.append(DLModelHandle)
             templist.append(DLDataset)
             templist.append(TrainParam)
-            """
+
             return ('Pre-process is done')
             # run.training(templist[0], templist[1], templist[2])
 
