@@ -16,7 +16,7 @@ engine = ha.HDevEngine()
 engine.set_procedure_path('C:/MVTec/Halcon-20.11-Progress/procedures')
 engine.set_procedure_path(
     'C:/Users/930415/Desktop/Halcon DL library files')
-RootDir = 'C:/Users/930415/Desktop/Chadle_Project'
+RootDir = 'C:/Users/930415/Desktop/Chadle_Data'
 ProjectDict = ['Animals', 'NTBW Image Analytics']
 ProjectDir = RootDir + '/' + 'Animals'
 
@@ -33,7 +33,7 @@ DLDatasetFileName = ExampleDataDir + '/dl_dataset.hdict'
 DLPreprocessParamFileName = ExampleDataDir + '/dl_preprocess_param.hdict'
 BestModelBaseName = ModelDir + '/best_dl_model_classification'
 FinalModelBaseName = ModelDir + '/final_dl_model_classification'
-program = ha.HDevProgram('C:/Users/930415/Desktop/DL_train_CL_seagate.hdev')
+program = ha.HDevProgram('C:/Users/930415/Desktop/Chadle_Halcon_Scripts/DL_train_CL_seagate.hdev')
 aug_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program,'augment_prepare'))
 preprocess_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program,'prepare_for_training'))
 #training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
@@ -86,8 +86,8 @@ DLModelHandle = preprocess_call.get_output_control_param_by_name('DLModelHandle'
 DLDataset = preprocess_call.get_output_control_param_by_name('DLDataset')
 TrainParam = preprocess_call.get_output_control_param_by_name('TrainParam')
 
-program = ha.HDevProgram('C:/Users/930415/Desktop/DL_train_CL_seagate.hdev')
-training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program,'train_dl_model_PK'))
+program = ha.HDevProgram('C:/Users/930415/Desktop/Chadle_Halcon_Scripts/DL_train_CL_seagate.hdev')
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program,'train_dl_model_CE'))
 #proc_training = ha.HDevProcedure.load_external('train_dl_model_CE')
 #proc_call = ha.HDevProcedureCall(proc_training)
 
@@ -95,5 +95,9 @@ training_call.set_input_control_param_by_name('DLModelHandle', DLModelHandle)
 training_call.set_input_control_param_by_name('DLDataset', DLDataset)
 training_call.set_input_control_param_by_name('TrainParam', TrainParam)
 training_call.set_input_control_param_by_name('StartEpoch', 0)
+training_call.set_input_control_param_by_name('Display_Ctrl', 1)
 
 training_call.execute()
+
+
+

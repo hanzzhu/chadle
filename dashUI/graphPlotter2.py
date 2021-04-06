@@ -1,48 +1,45 @@
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.animation import FuncAnimation
-import pandas as pd
-import geopandas as gpd
+import time
 
+import halcon as ha
 
-# function to update the data
-def my_function(i):
-    try:
-        df = pd.read_excel('w.xlsx', engine='openpyxl')
-    except:
-        print('error reading file')
-    world_values = world.merge(df, how='right', on='name', copy=True)
-    # clear axis
-    ax.cla()
-    ax1.cla()
+counter = 0
+iterationList =[]
+lossList = []
+epochList =[]
+while counter == 1:
 
-    world_values.plot(column='Val', ax=ax1, cmap='coolwarm', edgecolors='black', linewidths=0.5, alpha=0.8)
-    # remove spines
-    ax1.spines['left'].set_visible(False)
-    ax1.spines['right'].set_visible(False)
-    ax1.spines['top'].set_visible(False)
-    ax1.spines['bottom'].set_visible(False)
-    ax1.set_yticks([])
-    ax1.set_xticks([])
+    TrainInfo = ha.read_dict('C:/Users/930415\Desktop/Chadle_Halcon_Scripts/TrainInfo.hdict', (), ())
+    epoch_tuple = ha.get_dict_tuple(TrainInfo, 'epoch')
+    loss_tuple = ha.get_dict_tuple(TrainInfo, 'mean_loss')
+    num_iterations_per_epoch = ha.get_dict_tuple(TrainInfo, 'num_iterations_per_epoch')
+    iteration = num_iterations_per_epoch[0] * epoch_tuple[0]
 
-    alert = world_values[world_values['Val'] > 0.97].sort_values('Val', ascending=False)
-    ax.bar(alert.name, alert.Val, color='#E9493C', alpha=0.8)
-    ax.set_ylim(0.9, 1)
-    ax.set_xticklabels(alert.name, fontsize=11)
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
+    if iteration not in iterationList:
+        iterationList.append(iteration)
+        epochList.append(epoch_tuple[0])
+    if loss_tuple[0] not in lossList:
+        lossList.append(loss_tuple[0])
 
+    time.sleep(0.5)
+#    if TrainInfo == ha.read_dict('C:/Users/930415\Desktop/Chadle_Halcon_Scripts/TrainInfo.hdict', (), ()):
+ #       counter = 1
 
-# world map
-world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+    print(iterationList)
+    print(epochList)
+    print(lossList)
 
-# define and adjust figure
-fig, (ax, ax1) = plt.subplots(2, 1, figsize=(16, 12), facecolor='#707576', gridspec_kw={'height_ratios': [1, 3]})
-ax.set_facecolor('#707576')
-ax1.set_facecolor('#707576')
+Evaluation_Info = ha.read_dict('C:/Users/930415\Desktop/Chadle_Halcon_Scripts/EvaluationInfo.hdict', (), ())
 
-# animate
-ani = FuncAnimation(fig, my_function, interval=500)
+TrainSet_result = ha.get_dict_tuple(Evaluation_Info, 'result_train')
+TrainSet_result_global = ha.get_dict_tuple(TrainSet_result, 'global')
+TrainSet_top1_error = ha.get_dict_tuple(TrainSet_result_global, 'top1_error')
 
-fig.tight_layout()
-plt.show()
+ValidationSet_result = ha.get_dict_tuple(Evaluation_Info, 'result')
+ValidationSet_result_global = ha.get_dict_tuple(ValidationSet_result, 'global')
+ValidationSet_top1_error = ha.get_dict_tuple(ValidationSet_result_global, 'top1_error')
+
+TrainSet_top1_error_value = TrainSet_top1_error[0]
+ValidationSet_top1_error_value = ValidationSet_top1_error[0]
+
+print('TrainSet_top1_error: '+ str(TrainSet_top1_error[0]))
+print('ValidationSet_top1_error: '+ str(ValidationSet_top1_error[0]))
