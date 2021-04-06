@@ -221,7 +221,6 @@ def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedM
               Input('ProjectName', 'value'),
               State('Runtime', 'value'),
               State('PretrainedModel', 'value'),
-
               State('ImWidth', 'value'),
               State('ImHeight', 'value'),
               State('ImChannel', 'value'),
