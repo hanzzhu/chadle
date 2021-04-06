@@ -1,2 +1,4 @@
 
 __pycache__/test.cpython-38.pyc
+*.pyc
+venv/Lib/site-packages/certifi-2020.12.5.dist-info/INSTALLER
