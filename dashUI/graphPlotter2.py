@@ -38,8 +38,11 @@ ValidationSet_result = ha.get_dict_tuple(Evaluation_Info, 'result')
 ValidationSet_result_global = ha.get_dict_tuple(ValidationSet_result, 'global')
 ValidationSet_top1_error = ha.get_dict_tuple(ValidationSet_result_global, 'top1_error')
 
+Epoch = ha.get_dict_tuple(Evaluation_Info, 'epoch')
+
 TrainSet_top1_error_value = TrainSet_top1_error[0]
 ValidationSet_top1_error_value = ValidationSet_top1_error[0]
 
 print('TrainSet_top1_error: '+ str(TrainSet_top1_error[0]))
 print('ValidationSet_top1_error: '+ str(ValidationSet_top1_error[0]))
+print('Epoch: '+ str(Epoch[0]))
