@@ -14,6 +14,13 @@ def pre_process(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChan
                 ClassIDsNoOrientation):
     RootDir = 'C:/Users/930415/Desktop/Chadle_Project'
     ProjectDict = ['Animals', 'NTBW Image Analytics']
+    FileHandle = ha.open_file('mutex.dat', 'output')
+    ha.fwrite_string(FileHandle, 0)
+    if os.path.exists("C:/Users/930415/Desktop/Chadle_Halcon_Scripts/TrainInfo.hdict"):
+        os.remove("C:/Users/930415/Desktop/Chadle_Halcon_Scripts/TrainInfo.hdict")
+    if os.path.exists("C:/Users/930415/Desktop/Chadle_Halcon_Scripts/EvaluationInfo.hdict"):
+        os.remove("C:/Users/930415/Desktop/Chadle_Halcon_Scripts/EvaluationInfo.hdict")
+
     if ProjectName in ProjectDict:
         ProjectDir = RootDir + '/' + ProjectName
 
@@ -109,7 +116,7 @@ def training(DLModelHandle, DLDataset, TrainParam):
     training_call.set_input_control_param_by_name('StartEpoch', 0)
 
     training_call.execute()
-
+    return 'Training is done'
 
 def setup_hdev_engine():
     """Setup HDevEngine by setting procedure search paths."""
@@ -124,3 +131,49 @@ def setup_hdev_engine():
 
     # engine.set_procedure_path('E:/Customer evaluation/Seagate/HDev Engine_Python/dl_training_PK.hdpl')
     # engine.set_procedure_path('E:/Customer evaluation/Seagate/HDev Engine_Python/dl_visualization_PK.hdpl')
+
+
+def get_TrainInfo():
+    if os.path.isfile('C:/Users/930415/Desktop/Chadle_Halcon_Scripts/TrainInfo.hdict'):
+        try:
+            TrainInfo = ha.read_dict('C:/Users/930415/Desktop/Chadle_Halcon_Scripts/TrainInfo.hdict', (), ())
+            time_elapsed = ha.get_dict_tuple(TrainInfo, 'time_elapsed')
+            time_elapsed = time_elapsed[0]
+            time_remaining = ha.get_dict_tuple(TrainInfo, 'time_remaining')
+            time_remaining = time_remaining[0]
+            epoch_traininfo = ha.get_dict_tuple(TrainInfo, 'epoch')
+            epoch_traininfo = epoch_traininfo[0]
+            loss_tuple = ha.get_dict_tuple(TrainInfo, 'mean_loss')
+            loss_tuple = loss_tuple[0]
+            num_iterations_per_epoch = ha.get_dict_tuple(TrainInfo, 'num_iterations_per_epoch')
+            num_iterations_per_epoch = num_iterations_per_epoch[0]
+            iteration = num_iterations_per_epoch * epoch_traininfo
+            return time_elapsed, time_remaining, epoch_traininfo, loss_tuple, iteration
+        except:
+            Do_Nothing = True
+    else:
+        return False
+
+
+def get_EvaluationInfo():
+    if os.path.isfile('C:/Users/930415/Desktop/Chadle_Halcon_Scripts/EvaluationInfo.hdict'):
+        try:
+            Evaluation_Info = ha.read_dict('C:/Users/930415/Desktop/Chadle_Halcon_Scripts/EvaluationInfo.hdict', (), ())
+
+            epoch_evaluation = ha.get_dict_tuple(Evaluation_Info, 'epoch')
+            epoch_evaluation_value = epoch_evaluation[0]
+            TrainSet_result = ha.get_dict_tuple(Evaluation_Info, 'result_train')
+            TrainSet_result_global = ha.get_dict_tuple(TrainSet_result, 'global')
+            TrainSet_top1_error = ha.get_dict_tuple(TrainSet_result_global, 'top1_error')
+
+            ValidationSet_result = ha.get_dict_tuple(Evaluation_Info, 'result')
+            ValidationSet_result_global = ha.get_dict_tuple(ValidationSet_result, 'global')
+            ValidationSet_top1_error = ha.get_dict_tuple(ValidationSet_result_global, 'top1_error')
+
+            TrainSet_top1_error_value = TrainSet_top1_error[0]
+            ValidationSet_top1_error_value = ValidationSet_top1_error[0]
+            return epoch_evaluation_value, TrainSet_top1_error_value, ValidationSet_top1_error_value
+        except:
+            Do_Nothing = True
+    else:
+        return False
