@@ -1,11 +1,12 @@
 import time
-
+from halcon import *
 import halcon as ha
 
 counter = 0
 iterationList =[]
 lossList = []
 epochList =[]
+'''''
 while counter == 1:
 
     TrainInfo = ha.read_dict('C:/Users/930415\Desktop/Chadle_Halcon_Scripts/TrainInfo.hdict', (), ())
@@ -46,3 +47,14 @@ ValidationSet_top1_error_value = ValidationSet_top1_error[0]
 print('TrainSet_top1_error: '+ str(TrainSet_top1_error[0]))
 print('ValidationSet_top1_error: '+ str(ValidationSet_top1_error[0]))
 print('Epoch: '+ str(Epoch[0]))
+'''
+
+#data = [HHandle{type: dl_model, id: 0x27f3e45ae20}, HHandle{type: dict, id: 0x27f3e2d4f40}, HHandle{type: dict, id: 0x27f3e3f6820}]
+
+biglist = [377.0, 214.0, 50.0, 467.0]
+x = ['cat', 'dog']
+
+length = len(x)
+
+z = [biglist[i:i + length] for i in range(0, len(biglist), length)]
+print (z)

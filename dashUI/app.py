@@ -1,5 +1,5 @@
-import ha as ha
 import plotly
+import plotly.figure_factory as ff
 import os
 import dash
 import dash_core_components as dcc
@@ -8,6 +8,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import json
 import run
+import gunicorn
 
 iterationList = []
 lossList = []
@@ -33,8 +34,8 @@ app.layout = html.Div([
     ),
               "Training Device:", dcc.RadioItems(
             id='Runtime',
-            options=[{'label': i, 'value': i} for i in ['CPU', 'GPU']],
-            value='CPU',
+            options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
+            value='cpu',
             labelStyle={'display': 'inline-block'}
         ),
               "Pretrained Model:", dcc.Dropdown(
@@ -58,9 +59,9 @@ app.layout = html.Div([
             html.Label('Batch Size'),
             dcc.Input(id='BatchSize', value='1', type='number', min=0, step=1, ),
             html.Label('Initial Learning Rate'),
-            dcc.Input(id='InitialLearningRate', value='0.01', type='number', min=0, step=0.01, ),
+            dcc.Input(id='InitialLearningRate', value='0.001', type='number', min=0, step=0.001, ),
             html.Label('Momentum'),
-            dcc.Input(id='Momentum', value='0.9', type='number', min=0, step=0.01, ),
+            dcc.Input(id='Momentum', value='0.09', type='number', min=0, step=0.001, ),
             html.Label('Number of Epochs'),
             dcc.Input(id='NumEpochs', value='2', type='number', min=0, step=1, ),
             html.Label('Change Learning Rate @ Epochs'),
@@ -68,7 +69,7 @@ app.layout = html.Div([
             html.Label('Learning Rate Schedule'),
             dcc.Input(id='lr_change', value='0.01,0.05', type='text'),
             html.Label('Regularisation Constant'),
-            dcc.Input(id='WeightPrior', value='0.9', type='number', min=0, step=0.01, ),
+            dcc.Input(id='WeightPrior', value='0.001', type='number', min=0, step=0.001, ),
             html.Label('Class Penalty'),
             dcc.Input(id='class_penalty', value='0,0', type='text'),
         ],
@@ -100,6 +101,17 @@ app.layout = html.Div([
         ],
             style={'width': '20%', 'float': 'left', 'display': 'inline-block'}),
 
+        html.Div([html.H4('Evaluation'),
+                  html.Div(id='evaluation_text'),
+                  dcc.Graph(id='evaluation_graph'),
+                  ],
+                 style={'width': '50%', 'float': 'right', }),
+        dcc.Interval(
+            id='interval-evaluation',
+            interval=1 * 1000,  # in milliseconds
+            n_intervals=0
+        )
+
     ]),
 
     html.Br(),
@@ -108,11 +120,13 @@ app.layout = html.Div([
     html.Button(id='preprocess_button', n_clicks=0, children='Pre-Process'),
     html.Button(id='train_button', n_clicks=0, children='Train'),
     html.Button(id='parameters_out_button', n_clicks=0, children='Output Parameters'),
+    html.Button(id='evaluation_button', n_clicks=0, children='Evaluation'),
     html.Div(id='output-state'),
-    html.Div(id='Result'),
-    html.Div(id='Train'),
+    html.Div(id='Pre-process Result'),
+    html.Div(id='Train Result'),
     html.Div(id='parametersOut'),
-html.Div([
+    html.Div(id='Evaluation Result'),
+    html.Div([
         html.H4('Chadle Graph Plotter'),
         html.Div(id='indication-text'),
         dcc.Graph(id='iteration-loss-graph'),
@@ -140,7 +154,6 @@ html.Div([
               )
 def update_output(n_clicks, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel, BatchSize,
                   InitialLearningRate, Momentum, ):
-
     if n_clicks == 0:
         raise PreventUpdate
     else:
@@ -159,7 +172,7 @@ def update_output(n_clicks, ProjectName, Runtime, PretrainedModel, ImWidth, ImHe
                        InitialLearningRate, Momentum, )
 
 
-@app.callback(Output('Result', 'children'),
+@app.callback(Output('Pre-process Result', 'children'),
               Input('preprocess_button', 'n_clicks'),
               Input('train_button', 'n_clicks'),
               Input('ProjectName', 'value'),
@@ -194,20 +207,18 @@ def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedM
               class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
               CropPercentage, CropPixel, RotationRange, IgnoreDirection, ClassIDsNoOrientationExist,
               ClassIDsNoOrientation):
-
-    ctx = dash.callback_context
+    ctx_operation = dash.callback_context
     run.setup_hdev_engine()
-    if not ctx.triggered:
+    if not ctx_operation.triggered:
         button_id = 'Null'
     else:
-        button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+        button_id = ctx_operation.triggered[0]['prop_id'].split('.')[0]
 
     print(button_id)
     if button_id == 'Null':
         raise PreventUpdate
     else:
         if button_id == 'preprocess_button':
-
             pre_process_param = run.pre_process(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                                                 BatchSize, InitialLearningRate, Momentum, NumEpochs,
                                                 ChangeLearningRateEpochs, lr_change, WeightPrior,
@@ -223,12 +234,156 @@ def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedM
             templist.append(DLModelHandle)
             templist.append(DLDataset)
             templist.append(TrainParam)
-
-            return 'Pre-process is done'
-            # run.training(templist[0], templist[1], templist[2])
-
-        if button_id == 'train_button':
+            print(templist)
+            print(templist[-3], templist[-2], templist[-1])
+            # run.training(templist[-3], templist[-2], templist[-1])
             run.training(templist[0], templist[1], templist[2])
+        elif button_id == 'train_button':
+            i = 1
+            # run.training(templist[-3], templist[-2], templist[-1])
+
+    return "Done"
+
+
+@app.callback(Output('Train Result', 'children'),
+              Input('train_button', 'n_clicks'),
+              )
+def training(train_button):
+    ctx_training = dash.callback_context
+    if not ctx_training.triggered:
+        button_id = 'Null'
+    else:
+        button_id = ctx_training.triggered[0]['prop_id'].split('.')[0]
+    if button_id == 'train_button':
+        print(templist)
+        print(templist[-3], templist[-2], templist[-1])
+        # run.training(templist[-3], templist[-2], templist[-1])
+        return "Training Done"
+
+
+@app.callback(Output('evaluation_graph', 'figure'),
+              Input('evaluation_button', 'n_clicks'),
+              State('ProjectName', 'value'),
+              State('Runtime', 'value'),
+              State('PretrainedModel', 'value'),
+              State('ImWidth', 'value'),
+              State('ImHeight', 'value'),
+              State('ImChannel', 'value'),
+              State('BatchSize', 'value'),
+              State('InitialLearningRate', 'value'),
+              State('Momentum', 'value'),
+              State('NumEpochs', 'value'),
+              State('ChangeLearningRateEpochs', 'value'),
+              State('lr_change', 'value'),
+              State('WeightPrior', 'value'),
+              State('class_penalty', 'value'),
+              State('AugmentationPercentage', 'value'),
+              State('Rotation', 'value'),
+              State('mirror', 'value'),
+              State('BrightnessVariation', 'value'),
+              State('BrightnessVariationSpot', 'value'),
+              State('CropPercentage', 'value'),
+              State('CropPixel', 'value'),
+              State('RotationRange', 'value'),
+              State('IgnoreDirection', 'value'),
+
+              )
+def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
+               BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
+               class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
+               CropPercentage, CropPixel, RotationRange, IgnoreDirection,
+               ):
+    z = [[0, 0], [0, 0]]
+
+    x = ['Confusion Matrix', 'Confusion Matrix']
+    y = ['Confusion Matrix', 'Confusion Matrix']
+
+    # change each element of z to type string for annotations
+    z_text = [[str(y) for y in x] for x in z]
+
+    fig = ff.create_annotated_heatmap([[0, 0], [0, 0]], x=x, y=y, annotation_text=z_text, colorscale='Viridis')
+
+    ctx_evaluation = dash.callback_context
+    if not ctx_evaluation.triggered:
+        button_id = 'Null'
+    else:
+        button_id = ctx_evaluation.triggered[0]['prop_id'].split('.')[0]
+    if button_id == 'evaluation_button':
+        print('Evaluation Started')
+        evaluationList = run.evaluation(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
+                                        BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs,
+                                        lr_change, WeightPrior,
+                                        class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation,
+                                        BrightnessVariationSpot,
+                                        CropPercentage, CropPixel, RotationRange, IgnoreDirection, )
+
+        z.clear()
+        x.clear()
+        y.clear()
+        print(z, x)
+        z_text.clear()
+        confusion_matrix_List = evaluationList[0]
+        mean_precision = evaluationList[1][0]
+        mean_recall = evaluationList[2][0]
+        mean_f_score = evaluationList[3][0]
+
+        mean_precision = format(mean_precision, '.3f')
+        mean_recall = format(mean_recall, '.3f')
+        mean_f_score = format(mean_f_score, '.3f')
+
+        categories = run.getImageCategories(ProjectName)[0]
+        labels = run.getImageCategories(ProjectName)[1]
+        # threading.Thread(target=evaluation).start()
+
+        length = len(categories)
+
+        sublist = [confusion_matrix_List[i:i + length] for i in range(0, len(confusion_matrix_List), length)]
+        for i in sublist:
+            z.append(i)
+        for i in categories:
+            x.append(i)
+            y.append(i)
+
+        # change each element of z to type string for annotations
+        # z_text = [[str(y) for y in x] for x in z]
+        print(z, x)
+
+        # set up figure
+        z_text = [[str(y) for y in x] for x in z]
+        fig = ff.create_annotated_heatmap(z, x=x, y=y, annotation_text=z_text, colorscale='Viridis')
+        # change each element of z to type string for annotations
+        # add title
+        fig.update_layout(
+            title_text='Mean Precision: ' + str(mean_precision) + '\n Mean Recall: ' + str(
+                mean_recall) + '\n Mean F Score: ' + str(mean_f_score),
+        )
+
+        # add custom xaxis title
+        fig.add_annotation(dict(font=dict(color="black", size=14),
+                                x=0.5,
+                                y=-0.15,
+                                showarrow=False,
+                                text="Predicted",
+                                xref="paper",
+                                yref="paper"))
+
+        # add custom yaxis title
+        fig.add_annotation(dict(font=dict(color="black", size=14),
+                                x=-0.1,
+                                y=0.5,
+                                showarrow=False,
+                                text="Truth",
+                                textangle=-90,
+                                xref="paper",
+                                yref="paper"))
+
+        # adjust margins to make room for yaxis title
+        fig.update_layout(margin=dict(t=50, l=200))
+
+        # add colorbar
+        fig['data'][0]['showscale'] = True
+
+    return fig
 
 
 @app.callback(Output('parametersOut', 'children'),
@@ -287,12 +442,6 @@ def parametersOut(parameters_out_button, ProjectName, Runtime, PretrainedModel, 
         with open('parameters_json.txt', 'w') as outfile:
             json.dump(ParameterDict, outfile)
         return 'To json done!'
-
-
-@app.server.route('/downloads')
-def createFile():
-    return 0
-
 
 
 @app.callback(Output('indication-text', 'children'),
@@ -423,6 +572,7 @@ def top1_error_graph(n):
             'type': 'scatter'
         }, 1, 1)
     return top1_error_graph_fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
