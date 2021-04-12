@@ -3,8 +3,11 @@ import halcon as ha
 
 # import thread
 running = True  # Global flag
-ProjectDict = ['Animals', 'NTBW Image Analytics']
+
 RootDir = 'C:/Users/930415/Desktop/Chadle_Data'
+
+ProjectDict = next(os.walk(RootDir))[1]
+
 def setup_hdev_engine():
     """Setup HDevEngine by setting procedure search paths."""
 

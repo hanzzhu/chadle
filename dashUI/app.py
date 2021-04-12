@@ -1,3 +1,5 @@
+import base64
+
 import plotly
 import plotly.figure_factory as ff
 import os
@@ -21,20 +23,20 @@ templist = []
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+image_filename = 'C:/Users/930415/PycharmProjects/chadle/dashUI/icon.png' # replace with your own image
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 app.layout = html.Div([
-    html.Center(html.Img(src="https://i.imgur.com/YwZvIOq.png", height='70', width='80')),
+    html.Center(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width='80',height='70')),
     html.H1('CHaDLE ', style={
         "font": 'verdana',
         'textAlign': 'center',
         'color': 'Black'
     }),
 
-    html.Div(["Project Name:", dcc.Dropdown(
-        id='ProjectName',
-        options=[{'label': i, 'value': i} for i in ['Animals', 'NTBW Image Analytics']],
-        value='Animals'
-    ),
+    html.Div(["Project Name:", dcc.Input(
+        id='ProjectName', value='Animals', type='text'),
+              html.Br(),
               "Training Device:", dcc.RadioItems(
             id='Runtime',
             options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
@@ -273,7 +275,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
     # change each element of z to type string for annotations
     z_text = [[str(y) for y in x] for x in z]
 
-    fig = ff.create_annotated_heatmap([[0, 0], [0, 0]], x=x, y=y, annotation_text=z_text, colorscale='Viridis')
+    fig = ff.create_annotated_heatmap([[0, 0], [0, 0]], x=x, y=y, annotation_text=z_text, colorscale='Blues')
 
     ctx_evaluation = dash.callback_context
     if not ctx_evaluation.triggered:
@@ -335,7 +337,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
                                 x=0.5,
                                 y=-0.15,
                                 showarrow=False,
-                                text="Predicted",
+                                text="Ground Truth",
                                 xref="paper",
                                 yref="paper"))
 
@@ -344,7 +346,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
                                 x=-0.1,
                                 y=0.5,
                                 showarrow=False,
-                                text="Truth",
+                                text="Prediction",
                                 textangle=-90,
                                 xref="paper",
                                 yref="paper"))
