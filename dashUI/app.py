@@ -23,10 +23,13 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
-    html.H1('Chadle ', style={
-        'textAlign': 'left',
+    html.Center(html.Img(src="https://i.imgur.com/YwZvIOq.png", height='70', width='80')),
+    html.H1('CHaDLE ', style={
+        "font": 'verdana',
+        'textAlign': 'center',
         'color': 'Black'
     }),
+
     html.Div(["Project Name:", dcc.Dropdown(
         id='ProjectName',
         options=[{'label': i, 'value': i} for i in ['Animals', 'NTBW Image Analytics']],
@@ -116,13 +119,13 @@ app.layout = html.Div([
 
     html.Br(),
     html.Br(),
-    html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
-    html.Button(id='preprocess_button', n_clicks=0, children='Pre-Process'),
-    html.Button(id='train_button', n_clicks=0, children='Train'),
-    html.Button(id='parameters_out_button', n_clicks=0, children='Output Parameters'),
+    # html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
+    html.Button(id='operation_button', n_clicks=0, children='Start Training'),
+    # html.Button(id='train_button', n_clicks=0, children='Train'),
+    # html.Button(id='parameters_out_button', n_clicks=0, children='Output Parameters'),
     html.Button(id='evaluation_button', n_clicks=0, children='Evaluation'),
     html.Div(id='output-state'),
-    html.Div(id='Pre-process Result'),
+    html.Div(id='Operation Result'),
     html.Div(id='Train Result'),
     html.Div(id='parametersOut'),
     html.Div(id='Evaluation Result'),
@@ -140,41 +143,8 @@ app.layout = html.Div([
 ])
 
 
-@app.callback(Output('output-state', 'children'),
-              Input('submit-button-state', 'n_clicks'),
-              State('ProjectName', 'value'),
-              State('Runtime', 'value'),
-              State('PretrainedModel', 'value'),
-              State('ImWidth', 'value'),
-              State('ImHeight', 'value'),
-              State('ImChannel', 'value'),
-              State('BatchSize', 'value'),
-              State('InitialLearningRate', 'value'),
-              State('Momentum', 'value'),
-              )
-def update_output(n_clicks, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel, BatchSize,
-                  InitialLearningRate, Momentum, ):
-    if n_clicks == 0:
-        raise PreventUpdate
-    else:
-        return run.setup_hdev_engine(), u'''
-                The Button has been pressed {} times,\n
-                Project Name is "{}",\n
-                Training Device is "{}",\n
-                Pretrained model is "{}",\n
-                Pretrained model is "{}",\n
-                Pretrained model is "{}",\n
-                Pretrained model is "{}",\n
-                Pretrained model is "{}",\n
-                Pretrained model is "{}",\n
-                Pretrained model is "{}",\n
-            '''.format(n_clicks, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel, BatchSize,
-                       InitialLearningRate, Momentum, )
-
-
-@app.callback(Output('Pre-process Result', 'children'),
-              Input('preprocess_button', 'n_clicks'),
-              Input('train_button', 'n_clicks'),
+@app.callback(Output('Operation Result', 'children'),
+              Input('operation_button', 'n_clicks'),
               Input('ProjectName', 'value'),
               State('Runtime', 'value'),
               State('PretrainedModel', 'value'),
@@ -202,7 +172,7 @@ def update_output(n_clicks, ProjectName, Runtime, PretrainedModel, ImWidth, ImHe
               State('ClassIDsNoOrientationExist', 'value'),
               State('ClassIDsNoOrientation', 'value'),
               )
-def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
+def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
               BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
               class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
               CropPercentage, CropPixel, RotationRange, IgnoreDirection, ClassIDsNoOrientationExist,
@@ -218,7 +188,7 @@ def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedM
     if button_id == 'Null':
         raise PreventUpdate
     else:
-        if button_id == 'preprocess_button':
+        if button_id == 'operation_button':
             pre_process_param = run.pre_process(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                                                 BatchSize, InitialLearningRate, Momentum, NumEpochs,
                                                 ChangeLearningRateEpochs, lr_change, WeightPrior,
@@ -238,13 +208,14 @@ def operation(preprocess_button, train_button, ProjectName, Runtime, PretrainedM
             print(templist[-3], templist[-2], templist[-1])
             # run.training(templist[-3], templist[-2], templist[-1])
             run.training(templist[0], templist[1], templist[2])
-        elif button_id == 'train_button':
+        else:
             i = 1
             # run.training(templist[-3], templist[-2], templist[-1])
 
-    return "Done"
+    return "Training is done!"
 
 
+"""
 @app.callback(Output('Train Result', 'children'),
               Input('train_button', 'n_clicks'),
               )
@@ -259,6 +230,7 @@ def training(train_button):
         print(templist[-3], templist[-2], templist[-1])
         # run.training(templist[-3], templist[-2], templist[-1])
         return "Training Done"
+"""
 
 
 @app.callback(Output('evaluation_graph', 'figure'),
@@ -387,7 +359,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
 
 
 @app.callback(Output('parametersOut', 'children'),
-              Input('parameters_out_button', 'n_clicks'),
+              #       Input('parameters_out_button', 'n_clicks'),
               Input('ProjectName', 'value'),
               State('Runtime', 'value'),
               State('PretrainedModel', 'value'),
@@ -414,7 +386,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
               State('ClassIDsNoOrientationExist', 'value'),
               State('ClassIDsNoOrientation', 'value'),
               )
-def parametersOut(parameters_out_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
+def parametersOut(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                   BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
                   class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
                   CropPercentage, CropPixel, RotationRange, IgnoreDirection, ClassIDsNoOrientationExist,
