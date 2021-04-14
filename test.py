@@ -1,10 +1,14 @@
+import datetime
 import os
 
-ProjectDict = ['Animals', 'NTBW Image Analytics']
-RootDir = 'C:/Users/930415/Desktop/Chadle_Data'
-testDir = "C:/Users/930415/Desktop/Chadle_Data/Animals"
-
-ProjectNames = next(os.walk(RootDir))[1]
+# ProjectNames = next(os.walk(RootDir))[1]
 
 
-print(ProjectNames)
+project_list = ['abc', 'AAs']
+ProjectName = 'a'
+var = list(x for x in project_list if 'A' in x)
+print(var[0])
+
+var = list((x for x in list(map(str.upper, project_list)) if ProjectName.upper() in x))
+print(var)
+# print(ProjectNames)

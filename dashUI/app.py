@@ -1,4 +1,5 @@
 import base64
+import datetime
 
 import plotly
 import plotly.figure_factory as ff
@@ -10,7 +11,6 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import json
 import run
-import gunicorn
 
 iterationList = []
 lossList = []
@@ -23,33 +23,42 @@ templist = []
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-image_filename = 'C:/Users/930415/PycharmProjects/chadle/dashUI/icon.png' # replace with your own image
+image_filename = 'icon.png'  # replace with your own image
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
-app.layout = html.Div([
-    html.Center(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width='80',height='70')),
-    html.H1('CHaDLE ', style={
-        "font": 'verdana',
-        'textAlign': 'center',
-        'color': 'Black'
-    }),
+ProjectNames = ','.join(run.ProjectList)
 
-    html.Div(["Project Name:", dcc.Input(
-        id='ProjectName', value='Animals', type='text'),
-              html.Br(),
-              "Training Device:", dcc.RadioItems(
+app.layout = html.Div([
+    html.Center(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width='80', height='70')),
+    html.H1('CHaDLE ',
+            style={
+                "font": 'verdana',
+                'textAlign': 'center',
+                'color': 'Black'
+            }
+            ),
+
+    html.Div([
+        "Project Name:",
+        dcc.Input(
+            id='ProjectName', value='Animals', type='text'),
+
+        html.Br(),
+        html.Label(children='Available Projects: '+ProjectNames),
+        html.Br(),
+        "Training Device:", dcc.RadioItems(
             id='Runtime',
             options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
             value='cpu',
             labelStyle={'display': 'inline-block'}
         ),
-              "Pretrained Model:", dcc.Dropdown(
+        "Pretrained Model:", dcc.Dropdown(
             id='PretrainedModel',
             options=[{'label': i, 'value': i} for i in ["classifier_enhanced", "classifier_compact"]],
             value='classifier_compact'
         ),
-              ],
-             style={'width': '48%', 'display': 'inline-block'}),
+    ],
+        style={'width': '25%', 'display': 'inline-block'}),
     html.Br(),
     html.Br(),
 
@@ -324,7 +333,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
 
         # set up figure
         z_text = [[str(y) for y in x] for x in z]
-        fig = ff.create_annotated_heatmap(z, x=x, y=y, annotation_text=z_text, colorscale='Viridis')
+        fig = ff.create_annotated_heatmap(z, x=x, y=y, annotation_text=z_text, colorscale='Blues')
         # change each element of z to type string for annotations
         # add title
         fig.update_layout(
@@ -436,7 +445,7 @@ def update_metrics(n):
         epoch_metrics = 0
 
     return [
-        html.Span('Time Elapsed: {}s'.format(int(time_elapsed)), style=style),
+        html.Span('Time Elapsed: {}'.format(str(datetime.timedelta(seconds=int(time_elapsed)))), style=style),
         html.Span('Time Remaining: {}'.format(time_remaining), style=style),
         html.Span('Current Epoch: {}'.format(epoch_metrics), style=style)
     ]
@@ -485,7 +494,7 @@ def iteration_loss_graph(n):
         'y': lossList,
         'text': epochOfLossList,
         'name': 'iteration vs loss',
-        'mode': 'lines+markers',
+        'mode': 'lines',
         'type': 'scatter'
     }, 1, 1)
 
