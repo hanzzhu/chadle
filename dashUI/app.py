@@ -215,8 +215,7 @@ def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, 
             templist.append(DLModelHandle)
             templist.append(DLDataset)
             templist.append(TrainParam)
-            print(templist)
-            print(templist[-3], templist[-2], templist[-1])
+
             # run.training(templist[-3], templist[-2], templist[-1])
             run.training(templist[0], templist[1], templist[2])
         else:
@@ -303,7 +302,6 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
         z.clear()
         x.clear()
         y.clear()
-        print(z, x)
         z_text.clear()
         confusion_matrix_List = evaluationList[0]
         mean_precision = evaluationList[1][0]
@@ -329,7 +327,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
 
         # change each element of z to type string for annotations
         # z_text = [[str(y) for y in x] for x in z]
-        print(z, x)
+
 
         # set up figure
         z_text = [[str(y) for y in x] for x in z]

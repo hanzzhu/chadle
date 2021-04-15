@@ -167,7 +167,7 @@ def evaluation(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChann
                class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
                CropPercentage, CropPixel, RotationRange, IgnoreDirection,
                ):
-    print(ProjectList)
+
     call_list = setup_hdev_engine()
     aug_call = call_list[0]
     preprocess_call = call_list[1]
