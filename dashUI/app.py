@@ -35,30 +35,35 @@ app.layout = html.Div([
                 "font": 'verdana',
                 'textAlign': 'center',
                 'color': 'Black'
-            }
+                }
             ),
 
-    html.Div([
-        "Project Name:",
-        dcc.Input(
-            id='ProjectName', value='Animals', type='text'),
+    html.Div([html.Th(children='Available Projects: ' + ProjectNames, colSpan="1"),
+              html.Br(),
 
-        html.Br(),
-        html.Label(children='Available Projects: '+ProjectNames),
-        html.Br(),
-        "Training Device:", dcc.RadioItems(
-            id='Runtime',
-            options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
-            value='cpu',
-            labelStyle={'display': 'inline-block'}
-        ),
-        "Pretrained Model:", dcc.Dropdown(
-            id='PretrainedModel',
-            options=[{'label': i, 'value': i} for i in ["classifier_enhanced", "classifier_compact"]],
-            value='classifier_compact'
-        ),
-    ],
-        style={'width': '25%', 'display': 'inline-block'}),
+              "Project Name:",
+
+              dcc.Input(
+                  id='ProjectName', value='Animals', type='text'
+                ),
+
+              "Training Device:", dcc.RadioItems(
+                id='Runtime',
+                options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
+                value='cpu',
+                labelStyle={'display': 'inline-block'}
+                ),
+
+              "Pretrained Model:", dcc.Dropdown(
+                id='PretrainedModel',
+                options=[{'label': i, 'value': i} for i in ["classifier_enhanced", "classifier_compact"]],
+                value='classifier_compact'
+                ),
+              ],
+
+             style={'width': '25%', 'display': 'inline-block'}
+             ),
+
     html.Br(),
     html.Br(),
 
@@ -157,31 +162,31 @@ app.layout = html.Div([
 @app.callback(Output('Operation Result', 'children'),
               Input('operation_button', 'n_clicks'),
               Input('ProjectName', 'value'),
-              State('Runtime', 'value'),
-              State('PretrainedModel', 'value'),
+              Input('Runtime', 'value'),
+              Input('PretrainedModel', 'value'),
 
-              State('ImWidth', 'value'),
-              State('ImHeight', 'value'),
-              State('ImChannel', 'value'),
-              State('BatchSize', 'value'),
-              State('InitialLearningRate', 'value'),
-              State('Momentum', 'value'),
-              State('NumEpochs', 'value'),
-              State('ChangeLearningRateEpochs', 'value'),
-              State('lr_change', 'value'),
-              State('WeightPrior', 'value'),
-              State('class_penalty', 'value'),
-              State('AugmentationPercentage', 'value'),
-              State('Rotation', 'value'),
-              State('mirror', 'value'),
-              State('BrightnessVariation', 'value'),
-              State('BrightnessVariationSpot', 'value'),
-              State('CropPercentage', 'value'),
-              State('CropPixel', 'value'),
-              State('RotationRange', 'value'),
-              State('IgnoreDirection', 'value'),
-              State('ClassIDsNoOrientationExist', 'value'),
-              State('ClassIDsNoOrientation', 'value'),
+              Input('ImWidth', 'value'),
+              Input('ImHeight', 'value'),
+              Input('ImChannel', 'value'),
+              Input('BatchSize', 'value'),
+              Input('InitialLearningRate', 'value'),
+              Input('Momentum', 'value'),
+              Input('NumEpochs', 'value'),
+              Input('ChangeLearningRateEpochs', 'value'),
+              Input('lr_change', 'value'),
+              Input('WeightPrior', 'value'),
+              Input('class_penalty', 'value'),
+              Input('AugmentationPercentage', 'value'),
+              Input('Rotation', 'value'),
+              Input('mirror', 'value'),
+              Input('BrightnessVariation', 'value'),
+              Input('BrightnessVariationSpot', 'value'),
+              Input('CropPercentage', 'value'),
+              Input('CropPixel', 'value'),
+              Input('RotationRange', 'value'),
+              Input('IgnoreDirection', 'value'),
+              Input('ClassIDsNoOrientationExist', 'value'),
+              Input('ClassIDsNoOrientation', 'value'),
               )
 def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
               BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
@@ -212,6 +217,7 @@ def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, 
             DLModelHandle = pre_process_param[0][0]
             DLDataset = pre_process_param[1][0]
             TrainParam = pre_process_param[2][0]
+            run.training(DLModelHandle, DLDataset, TrainParam)
             templist.append(DLModelHandle)
             templist.append(DLDataset)
             templist.append(TrainParam)
@@ -327,7 +333,6 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
 
         # change each element of z to type string for annotations
         # z_text = [[str(y) for y in x] for x in z]
-
 
         # set up figure
         z_text = [[str(y) for y in x] for x in z]
