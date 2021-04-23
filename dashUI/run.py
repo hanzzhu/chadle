@@ -46,8 +46,7 @@ def setup_hdev_engine():
 def pre_process(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                 BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
                 class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
-                CropPercentage, CropPixel, RotationRange, IgnoreDirection, ClassIDsNoOrientationExist,
-                ClassIDsNoOrientation):
+                RotationRange,):
     call_list = setup_hdev_engine()
     aug_call = call_list[0]
     preprocess_call = call_list[1]
@@ -165,7 +164,7 @@ def training(DLModelHandle, DLDataset, TrainParam):
 def evaluation(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
                class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
-               CropPercentage, CropPixel, RotationRange, IgnoreDirection,
+
                ):
 
     call_list = setup_hdev_engine()

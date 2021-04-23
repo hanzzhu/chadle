@@ -35,7 +35,7 @@ app.layout = html.Div([
                 "font": 'verdana',
                 'textAlign': 'center',
                 'color': 'Black'
-                }
+            }
             ),
 
     html.Div([html.Th(children='Available Projects: ' + ProjectNames, colSpan="1"),
@@ -45,20 +45,20 @@ app.layout = html.Div([
 
               dcc.Input(
                   id='ProjectName', value='Animals', type='text'
-                ),
+              ),
 
               "Training Device:", dcc.RadioItems(
-                id='Runtime',
-                options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
-                value='cpu',
-                labelStyle={'display': 'inline-block'}
-                ),
+            id='Runtime',
+            options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
+            value='cpu',
+            labelStyle={'display': 'inline-block'}
+        ),
 
               "Pretrained Model:", dcc.Dropdown(
-                id='PretrainedModel',
-                options=[{'label': i, 'value': i} for i in ["classifier_enhanced", "classifier_compact"]],
-                value='classifier_compact'
-                ),
+            id='PretrainedModel',
+            options=[{'label': i, 'value': i} for i in ["classifier_enhanced", "classifier_compact"]],
+            value='classifier_compact'
+        ),
               ],
 
              style={'width': '25%', 'display': 'inline-block'}
@@ -78,17 +78,17 @@ app.layout = html.Div([
             html.Label('Batch Size'),
             dcc.Input(id='BatchSize', value='1', type='number', min=0, step=1, ),
             html.Label('Initial Learning Rate'),
-            dcc.Input(id='InitialLearningRate', value='0.001', type='number', min=0, step=0.001, ),
+            dcc.Input(id='InitialLearningRate', value='0.001', type='number', min=0, step=0.00001, ),
             html.Label('Momentum'),
-            dcc.Input(id='Momentum', value='0.09', type='number', min=0, step=0.001, ),
+            dcc.Input(id='Momentum', value='0.09', type='number', min=0, step=0.00001, ),
             html.Label('Number of Epochs'),
             dcc.Input(id='NumEpochs', value='2', type='number', min=0, step=1, ),
             html.Label('Change Learning Rate @ Epochs'),
-            dcc.Input(id='ChangeLearningRateEpochs', value='5,100', type='text'),
+            dcc.Input(id='ChangeLearningRateEpochs', value='50,100', type='text'),
             html.Label('Learning Rate Schedule'),
             dcc.Input(id='lr_change', value='0.01,0.05', type='text'),
             html.Label('Regularisation Constant'),
-            dcc.Input(id='WeightPrior', value='0.001', type='number', min=0, step=0.001, ),
+            dcc.Input(id='WeightPrior', value='0.001', type='number', min=0, step=0.00001, ),
             html.Label('Class Penalty'),
             dcc.Input(id='class_penalty', value='0,0', type='text'),
         ],
@@ -105,18 +105,14 @@ app.layout = html.Div([
             dcc.Input(id='BrightnessVariation', value='1', type='number', min=-100, max=100, step=1, ),
             html.Label('Brightness Variation Spot'),
             dcc.Input(id='BrightnessVariationSpot', value='1', type='number', min=-100, max=100, step=1, ),
-            html.Label('Crop Percentage'),
-            dcc.Input(id='CropPercentage', value='50', type='number', min=1, max=100, step=1, ),
-            html.Label('Crop Pixel'),
-            dcc.Input(id='CropPixel', value='500', type='number', min=1, step=1, ),
-            html.Label('Rotation Range'),
+            html.Label('Rotation Range (Step of 1)'),
             dcc.Input(id='RotationRange', value='1', type='number', min=1, step=1, ),
-            html.Label('Ignore Direction'),
-            dcc.Input(id='IgnoreDirection', value='false', type='text'),
-            html.Label('Class IDs No Orientation Exist'),
-            dcc.Input(id='ClassIDsNoOrientationExist', value='false', type='text'),
-            html.Label('Class Penalty'),
-            dcc.Input(id='ClassIDsNoOrientation', value='[]', type='text'),
+            #html.Label('Ignore Direction'),
+            #dcc.Input(id='IgnoreDirection', value='false', type='text'),
+            #html.Label('Class IDs No Orientation Exist'),
+            #dcc.Input(id='ClassIDsNoOrientationExist', value='false', type='text'),
+            #html.Label('Class IDs No Orientation'),
+            #dcc.Input(id='ClassIDsNoOrientation', value='[]', type='text'),
         ],
             style={'width': '20%', 'float': 'left', 'display': 'inline-block'}),
 
@@ -181,18 +177,16 @@ app.layout = html.Div([
               State('mirror', 'value'),
               State('BrightnessVariation', 'value'),
               State('BrightnessVariationSpot', 'value'),
-              State('CropPercentage', 'value'),
-              State('CropPixel', 'value'),
+
               State('RotationRange', 'value'),
-              State('IgnoreDirection', 'value'),
-              State('ClassIDsNoOrientationExist', 'value'),
-              State('ClassIDsNoOrientation', 'value'),
+              #State('IgnoreDirection', 'value'),
+              #State('ClassIDsNoOrientationExist', 'value'),
+              #State('ClassIDsNoOrientation', 'value'),
               )
 def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
               BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
               class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
-              CropPercentage, CropPixel, RotationRange, IgnoreDirection, ClassIDsNoOrientationExist,
-              ClassIDsNoOrientation):
+              RotationRange):
     ctx_operation = dash.callback_context
     run.setup_hdev_engine()
     if not ctx_operation.triggered:
@@ -210,9 +204,7 @@ def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, 
                                                 ChangeLearningRateEpochs, lr_change, WeightPrior,
                                                 class_penalty, AugmentationPercentage, Rotation, mirror,
                                                 BrightnessVariation, BrightnessVariationSpot,
-                                                CropPercentage, CropPixel, RotationRange, IgnoreDirection,
-                                                ClassIDsNoOrientationExist,
-                                                ClassIDsNoOrientation)
+                                                RotationRange)
 
             DLModelHandle = pre_process_param[0][0]
             DLDataset = pre_process_param[1][0]
@@ -228,7 +220,7 @@ def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, 
             i = 1
             # run.training(templist[-3], templist[-2], templist[-1])
 
-    return "Training is done!"
+    return ""
 
 
 """
@@ -270,16 +262,14 @@ def training(train_button):
               State('mirror', 'value'),
               State('BrightnessVariation', 'value'),
               State('BrightnessVariationSpot', 'value'),
-              State('CropPercentage', 'value'),
-              State('CropPixel', 'value'),
-              State('RotationRange', 'value'),
-              State('IgnoreDirection', 'value'),
+              #State('RotationRange', 'value'),
+              #State('IgnoreDirection', 'value'),
 
               )
 def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
                class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
-               CropPercentage, CropPixel, RotationRange, IgnoreDirection,
+
                ):
     z = [[0, 0], [0, 0]]
 
@@ -303,7 +293,7 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
                                         lr_change, WeightPrior,
                                         class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation,
                                         BrightnessVariationSpot,
-                                        CropPercentage, CropPixel, RotationRange, IgnoreDirection, )
+                                        )
 
         z.clear()
         x.clear()
@@ -393,18 +383,17 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
               State('mirror', 'value'),
               State('BrightnessVariation', 'value'),
               State('BrightnessVariationSpot', 'value'),
-              State('CropPercentage', 'value'),
-              State('CropPixel', 'value'),
+
+
               State('RotationRange', 'value'),
-              State('IgnoreDirection', 'value'),
-              State('ClassIDsNoOrientationExist', 'value'),
-              State('ClassIDsNoOrientation', 'value'),
+              #State('IgnoreDirection', 'value'),
+              #State('ClassIDsNoOrientationExist', 'value'),
+              #State('ClassIDsNoOrientation', 'value'),
               )
 def parametersOut(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                   BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
                   class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
-                  CropPercentage, CropPixel, RotationRange, IgnoreDirection, ClassIDsNoOrientationExist,
-                  ClassIDsNoOrientation):
+                  RotationRange,):
     ParameterDict = {'ProjectName': ProjectName,
                      'Runtime': Runtime, 'PretrainedModel': PretrainedModel, 'ImWidth': ImWidth, 'ImHeight': ImHeight,
                      'ImChannel': ImChannel,
@@ -415,10 +404,7 @@ def parametersOut(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImCh
                      'class_penalty': class_penalty, 'AugmentationPercentage': AugmentationPercentage,
                      'Rotation': Rotation, 'mirror': mirror,
                      'BrightnessVariation': BrightnessVariation, 'BrightnessVariationSpot': BrightnessVariationSpot,
-                     'CropPercentage': CropPercentage, 'CropPixel': CropPixel, 'RotationRange': RotationRange,
-                     'IgnoreDirection': IgnoreDirection,
-                     'ClassIDsNoOrientationExist': ClassIDsNoOrientationExist,
-                     'ClassIDsNoOrientation': ClassIDsNoOrientation}
+                     'RotationRange': RotationRange,}
     ctx = dash.callback_context
     if not ctx.triggered:
         button_id = 'Null'
@@ -493,9 +479,9 @@ def iteration_loss_graph(n):
     # Add the values to graph and start plotting.
     iteration_loss_graph_fig.append_trace({
 
-        'x': iterationList,
+        'x': epochOfLossList,
         'y': lossList,
-        'text': epochOfLossList,
+        'text': iterationList,
         'name': 'iteration vs loss',
         'mode': 'lines',
         'type': 'scatter'
