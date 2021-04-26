@@ -46,7 +46,7 @@ app.layout = html.Div([
               dcc.Input(
                   id='ProjectName', value='Animals', type='text'
               ),
-
+              html.Br(),
               "Training Device:", dcc.RadioItems(
             id='Runtime',
             options=[{'label': i, 'value': i} for i in ['cpu', 'gpu']],
@@ -107,12 +107,12 @@ app.layout = html.Div([
             dcc.Input(id='BrightnessVariationSpot', value='1', type='number', min=-100, max=100, step=1, ),
             html.Label('Rotation Range (Step of 1)'),
             dcc.Input(id='RotationRange', value='1', type='number', min=1, step=1, ),
-            #html.Label('Ignore Direction'),
-            #dcc.Input(id='IgnoreDirection', value='false', type='text'),
-            #html.Label('Class IDs No Orientation Exist'),
-            #dcc.Input(id='ClassIDsNoOrientationExist', value='false', type='text'),
-            #html.Label('Class IDs No Orientation'),
-            #dcc.Input(id='ClassIDsNoOrientation', value='[]', type='text'),
+            # html.Label('Ignore Direction'),
+            # dcc.Input(id='IgnoreDirection', value='false', type='text'),
+            # html.Label('Class IDs No Orientation Exist'),
+            # dcc.Input(id='ClassIDsNoOrientationExist', value='false', type='text'),
+            # html.Label('Class IDs No Orientation'),
+            # dcc.Input(id='ClassIDsNoOrientation', value='[]', type='text'),
         ],
             style={'width': '20%', 'float': 'left', 'display': 'inline-block'}),
 
@@ -179,9 +179,9 @@ app.layout = html.Div([
               State('BrightnessVariationSpot', 'value'),
 
               State('RotationRange', 'value'),
-              #State('IgnoreDirection', 'value'),
-              #State('ClassIDsNoOrientationExist', 'value'),
-              #State('ClassIDsNoOrientation', 'value'),
+              # State('IgnoreDirection', 'value'),
+              # State('ClassIDsNoOrientationExist', 'value'),
+              # State('ClassIDsNoOrientation', 'value'),
               )
 def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
               BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
@@ -262,8 +262,8 @@ def training(train_button):
               State('mirror', 'value'),
               State('BrightnessVariation', 'value'),
               State('BrightnessVariationSpot', 'value'),
-              #State('RotationRange', 'value'),
-              #State('IgnoreDirection', 'value'),
+              # State('RotationRange', 'value'),
+              # State('IgnoreDirection', 'value'),
 
               )
 def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
@@ -384,16 +384,15 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
               State('BrightnessVariation', 'value'),
               State('BrightnessVariationSpot', 'value'),
 
-
               State('RotationRange', 'value'),
-              #State('IgnoreDirection', 'value'),
-              #State('ClassIDsNoOrientationExist', 'value'),
-              #State('ClassIDsNoOrientation', 'value'),
+              # State('IgnoreDirection', 'value'),
+              # State('ClassIDsNoOrientationExist', 'value'),
+              # State('ClassIDsNoOrientation', 'value'),
               )
 def parametersOut(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
                   BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
                   class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation, BrightnessVariationSpot,
-                  RotationRange,):
+                  RotationRange, ):
     ParameterDict = {'ProjectName': ProjectName,
                      'Runtime': Runtime, 'PretrainedModel': PretrainedModel, 'ImWidth': ImWidth, 'ImHeight': ImHeight,
                      'ImChannel': ImChannel,
@@ -404,7 +403,7 @@ def parametersOut(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImCh
                      'class_penalty': class_penalty, 'AugmentationPercentage': AugmentationPercentage,
                      'Rotation': Rotation, 'mirror': mirror,
                      'BrightnessVariation': BrightnessVariation, 'BrightnessVariationSpot': BrightnessVariationSpot,
-                     'RotationRange': RotationRange,}
+                     'RotationRange': RotationRange, }
     ctx = dash.callback_context
     if not ctx.triggered:
         button_id = 'Null'
