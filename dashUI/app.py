@@ -18,11 +18,11 @@ epochOfLossList = []
 epochOfTop1ErrorList = []
 TrainSet_top1_error_valueList = []
 ValidationSet_top1_error_valueList = []
+metricList = []
 
-templist = []
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
 image_filename = 'icon.png'  # replace with your own image
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
@@ -160,7 +160,6 @@ app.layout = html.Div([
               State('ProjectName', 'value'),
               State('Runtime', 'value'),
               State('PretrainedModel', 'value'),
-
               State('ImWidth', 'value'),
               State('ImHeight', 'value'),
               State('ImChannel', 'value'),
@@ -177,11 +176,7 @@ app.layout = html.Div([
               State('mirror', 'value'),
               State('BrightnessVariation', 'value'),
               State('BrightnessVariationSpot', 'value'),
-
               State('RotationRange', 'value'),
-              # State('IgnoreDirection', 'value'),
-              # State('ClassIDsNoOrientationExist', 'value'),
-              # State('ClassIDsNoOrientation', 'value'),
               )
 def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
               BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs, lr_change, WeightPrior,
@@ -210,9 +205,9 @@ def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, 
             DLDataset = pre_process_param[1][0]
             TrainParam = pre_process_param[2][0]
             run.training(DLModelHandle, DLDataset, TrainParam)
-            templist.append(DLModelHandle)
-            templist.append(DLDataset)
-            templist.append(TrainParam)
+            metricList.append(DLModelHandle)
+            metricList.append(DLDataset)
+            metricList.append(TrainParam)
 
             # run.training(templist[-3], templist[-2], templist[-1])
             # run.training(templist[0], templist[1], templist[2])
