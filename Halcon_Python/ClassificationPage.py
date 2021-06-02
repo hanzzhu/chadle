@@ -25,13 +25,13 @@ Initialise Halcon
 engine = ha.HDevEngine()
 engine.set_procedure_path('C:/MVTec/Halcon-20.11-Progress/procedures')
 engine.set_procedure_path(
-    'C:/Users/930415/Desktop/Halcon DL library files')
+    'C:/Users/930415/Desktop/Chadle_Projects/Halcon_DL_library_files')
 # path where dl_training_PK.hdl and dl_visulaization_PK.hdl files are located
 
-program = ha.HDevProgram('C:/Users/930415/Desktop/DL_train_CL_seagate.hdev')
+program = ha.HDevProgram('C:/Users/930415/Desktop/Chadle_Projects/Chadle_Halcon_Scripts/DL_train_CL_seagate_old.hdev')
 aug_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'augment_prepare'))
 preprocess_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'prepare_for_training'))
-training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_PK'))
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_CE'))
 evaluation_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'Evaluation'))
 
 

@@ -129,14 +129,14 @@ def augment_prepare(proc_name_augment):
 
 def prep_for_training(GenParamName_augment, GenParamValue_augment, proc_name):
     """Execute procedure for image acquisition."""
-    proc = ha.HDevProcedure.load_local(program,'prepare_for_training')
+    proc = ha.HDevProcedure.load_local(program, 'prepare_for_training')
     proc_call = ha.HDevProcedureCall(proc)
 
     proc_call.set_input_control_param_by_name('ExampleDataDir', ExampleDataDir)
     proc_call.set_input_control_param_by_name('ModelFileName', ModelFileName)
     # proc_call.set_input_control_param_by_name('DataDirectory', DataDirectory)
-    proc_call.set_input_control_param_by_name('DLDatasetFileName', DLDatasetFileName)
-    proc_call.set_input_control_param_by_name('DLPreprocessParamFileName', DLPreprocessParamFileName)
+    # proc_call.set_input_control_param_by_name('DLDatasetFileName', DLDatasetFileName)
+    # proc_call.set_input_control_param_by_name('DLPreprocessParamFileName', DLPreprocessParamFileName)
     proc_call.set_input_control_param_by_name('BestModelBaseName', BestModelBaseName)
     proc_call.set_input_control_param_by_name('FinalModelBaseName', FinalModelBaseName)
     proc_call.set_input_control_param_by_name('BatchSize', BatchSize)
@@ -162,7 +162,7 @@ def prep_for_training(GenParamName_augment, GenParamValue_augment, proc_name):
 
 
 def training(DLDataset, DLModelHandle, TrainParam):
-    training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_CE'))
+    training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_local(program, 'train_dl_model_CE_old'))
 
     Display_Enable = 1
 

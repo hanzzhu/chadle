@@ -207,7 +207,7 @@ def control_execution():
 
 
 def training(DLDataset, DLModelHandle, TrainParam):
-    proc_training = ha.HDevProcedure.load_external('train_dl_model_CE')
+    proc_training = ha.HDevProcedure.load_external('train_dl_model_CE_old')
     proc_call = ha.HDevProcedureCall(proc_training)
 
     proc_call.set_input_control_param_by_name('DLModelHandle', DLModelHandle)

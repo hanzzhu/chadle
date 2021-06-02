@@ -21,15 +21,15 @@ import halcon as ha
 
 from makeCM import make_confusion_matrix
 engine = ha.HDevEngine()
-engine.set_procedure_path('C:/Program Files/MVTec/HALCON-20.11-Progress/procedures')
-
+engine.set_procedure_path('C:/MVTec/Halcon-20.11-Progress/procedures')
 engine.set_procedure_path(
-        'C:/Users/930415/Desktop/Halcon DL library files')
+    'C:/Users/930415/Desktop/Chadle_Projects/Halcon_DL_library_files')
+# path where dl_training_PK.hdl and dl_visulaization_PK.hdl files are located
 
 
 augment_proc_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('augment_prepare'))
 prep_for_training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('prepare_for_training'))
-training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_PK'))
+training_call = ha.HDevProcedureCall(ha.HDevProcedure.load_external('train_dl_model_CE_old'))
 
 class ObjectDetection(GUI):
     def __init__(self, parent, controller):

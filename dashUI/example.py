@@ -47,7 +47,7 @@ def update_metrics(n):
     # Extract data from Hdict and show as texts.
     style = {'padding': '5px', 'fontSize': '16px'}
 
-    getmetrics = run.get_TrainInfo()
+    getmetrics = run.get_TrainInfo_CL()
     if getmetrics:
         time_elapsed = getmetrics[0]
         time_remaining = getmetrics[1]
@@ -81,7 +81,7 @@ def iteration_loss_graph(n):
 
     # If Hdict files does not exist, clear graph and lists for plotting.
     # Therefore, could reset graph by deleting the Hdict files.
-    getTrainInfo = run.get_TrainInfo()
+    getTrainInfo = run.get_TrainInfo_CL()
     if not getTrainInfo:
 
         iterationList.clear()
@@ -129,7 +129,7 @@ def top1_error_graph(n):
 
     # If Hdict files does not exist, clear graph and lists for plotting.
     # Therefore, could reset graph by deleting the Hdict files.
-    getEvaluationInfo = run.get_EvaluationInfo()
+    getEvaluationInfo = run.get_EvaluationInfo_CL()
     if not getEvaluationInfo:
         TrainSet_top1_error_valueList.clear()
         ValidationSet_top1_error_valueList.clear()

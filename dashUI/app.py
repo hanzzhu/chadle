@@ -194,17 +194,17 @@ def operation(operation_button, ProjectName, Runtime, PretrainedModel, ImWidth, 
         raise PreventUpdate
     else:
         if button_id == 'operation_button':
-            pre_process_param = run.pre_process(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
-                                                BatchSize, InitialLearningRate, Momentum, NumEpochs,
-                                                ChangeLearningRateEpochs, lr_change, WeightPrior,
-                                                class_penalty, AugmentationPercentage, Rotation, mirror,
-                                                BrightnessVariation, BrightnessVariationSpot,
-                                                RotationRange)
+            pre_process_param = run.pre_process_CL(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
+                                                   BatchSize, InitialLearningRate, Momentum, NumEpochs,
+                                                   ChangeLearningRateEpochs, lr_change, WeightPrior,
+                                                   class_penalty, AugmentationPercentage, Rotation, mirror,
+                                                   BrightnessVariation, BrightnessVariationSpot,
+                                                   RotationRange)
 
             DLModelHandle = pre_process_param[0][0]
             DLDataset = pre_process_param[1][0]
             TrainParam = pre_process_param[2][0]
-            run.training(DLModelHandle, DLDataset, TrainParam)
+            run.training_CL(DLModelHandle, DLDataset, TrainParam)
             metricList.append(DLModelHandle)
             metricList.append(DLDataset)
             metricList.append(TrainParam)
@@ -283,12 +283,12 @@ def evaluation(evaluation_button, ProjectName, Runtime, PretrainedModel, ImWidth
         button_id = ctx_evaluation.triggered[0]['prop_id'].split('.')[0]
     if button_id == 'evaluation_button':
         print('Evaluation Started')
-        evaluationList = run.evaluation(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
-                                        BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs,
-                                        lr_change, WeightPrior,
-                                        class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation,
-                                        BrightnessVariationSpot,
-                                        )
+        evaluationList = run.evaluation_CL(ProjectName, Runtime, PretrainedModel, ImWidth, ImHeight, ImChannel,
+                                           BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs,
+                                           lr_change, WeightPrior,
+                                           class_penalty, AugmentationPercentage, Rotation, mirror, BrightnessVariation,
+                                           BrightnessVariationSpot,
+                                           )
 
         z.clear()
         x.clear()
@@ -417,7 +417,7 @@ def update_metrics(n):
     # Extract data from Hdict and show as texts.
     style = {'padding': '5px', 'fontSize': '16px'}
 
-    getmetrics = run.get_TrainInfo()
+    getmetrics = run.get_TrainInfo_CL()
     if getmetrics:
         time_elapsed = getmetrics[0]
         time_remaining = getmetrics[1]
@@ -451,7 +451,7 @@ def iteration_loss_graph(n):
 
     # If Hdict files does not exist, clear graph and lists for plotting.
     # Therefore, could reset graph by deleting the Hdict files.
-    getTrainInfo = run.get_TrainInfo()
+    getTrainInfo = run.get_TrainInfo_CL()
     if not getTrainInfo:
 
         iterationList.clear()
@@ -499,7 +499,7 @@ def top1_error_graph(n):
 
     # If Hdict files does not exist, clear graph and lists for plotting.
     # Therefore, could reset graph by deleting the Hdict files.
-    getEvaluationInfo = run.get_EvaluationInfo()
+    getEvaluationInfo = run.get_EvaluationInfo_CL()
     if not getEvaluationInfo:
 
         TrainSet_top1_error_valueList.clear()
