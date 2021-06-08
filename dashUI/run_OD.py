@@ -10,7 +10,9 @@ Halcon_DL_library_filesDir = Chadle_ProjectsDir + '/Halcon_DL_library_files'
 
 TrainInfoDir = Chadle_Halcon_ScriptsDir_OD + '/TrainInfo.hdict'
 EvaluationInfoDir = Chadle_Halcon_ScriptsDir_OD + '/EvaluationInfo.hdict'
-ODProjectList = next(os.walk(Chadle_DataDir+'/Object_Detection'))[1]
+ODProjectList = next(os.walk(Chadle_DataDir + '/Object_Detection'))[1]
+PretrainedCompactModel_OD = Chadle_Halcon_ScriptsDir_OD + '/pretrained_dl_classifier_compact.hdl'
+PretrainedEnhancedModel_OD = Chadle_Halcon_ScriptsDir_OD + '/pretrained_dl_classifier_enhanced.hdl'
 ###### Input/output directories ######
 
 SeedRand = 42
@@ -125,6 +127,10 @@ def preprocess_OD(ImWidth, ImHeight, ImageNumChannels, TrainingPercent, Validati
         os.remove(TrainInfoDir)
     if os.path.exists(EvaluationInfoDir):
         os.remove(EvaluationInfoDir)
+    if os.path.exists(PretrainedCompactModel_OD):
+        os.remove(PretrainedCompactModel_OD)
+    if os.path.exists(PretrainedEnhancedModel_OD):
+        os.remove(PretrainedEnhancedModel_OD)
 
     ModelFileName = 'pretrained_dl_' + Backbone + '.hdl'
     # ModelFileName = Chadle_Halcon_ScriptsDir + '/pretrained_OD/pretrained_dl_classifier_enhanced.hdl'
@@ -194,8 +200,10 @@ def preprocess_OD(ImWidth, ImHeight, ImageNumChannels, TrainingPercent, Validati
 
 
 def prepare_for_training_OD(AugmentationPercentage, Rotation, Mirror, BrightnessVariation, BrightnessVariationSpot,
-                            RotationRange, BatchSize, InitialLearningRate, Momentum, NumEpochs, ChangeLearningRateEpochs,
-                            lr_change, WeightPrior, Class_Penalty, DLDatasetFileName, DLPreprocessParamFileName,ModelFileName):
+                            RotationRange, BatchSize, InitialLearningRate, Momentum, NumEpochs,
+                            ChangeLearningRateEpochs,
+                            lr_change, WeightPrior, Class_Penalty, DLDatasetFileName, DLPreprocessParamFileName,
+                            ModelFileName):
     BestModelBaseName = ModelDir + '/best_dl_model_detection'
     FinalModelBaseName = ModelDir + '/final_dl_model_detection'
 
@@ -230,7 +238,7 @@ def prepare_for_training_OD(AugmentationPercentage, Rotation, Mirror, Brightness
     prepare_for_training_call.set_input_control_param_by_name('BatchSize', int(BatchSize))
     prepare_for_training_call.set_input_control_param_by_name('InitialLearningRate', float(InitialLearningRate))
     prepare_for_training_call.set_input_control_param_by_name('Momentum', float(Momentum))
-    prepare_for_training_call.set_input_control_param_by_name('NumEpochs', 5)
+    prepare_for_training_call.set_input_control_param_by_name('NumEpochs', int(NumEpochs))
     prepare_for_training_call.set_input_control_param_by_name('EvaluationIntervalEpochs', 1)
 
     ChangeLearningRateEpochsList = ChangeLearningRateEpochs.split(',')
@@ -269,6 +277,7 @@ def training_OD(DLDataset, DLModelHandle, TrainParam):
     training_call.set_input_control_param_by_name('Display_Ctrl', 1)
 
     training_call.execute()
+
 
 def get_TrainInfo_OD():
     if os.path.isfile(TrainInfoDir):
@@ -311,32 +320,39 @@ def get_EvaluationInfo_OD():
 
             epoch_evaluation = ha.get_dict_tuple(Evaluation_Info, 'epoch')
             epoch_evaluation_value = epoch_evaluation[0]
+
             TrainSet_result = ha.get_dict_tuple(Evaluation_Info, 'result_train')
-            TrainSet_result_global = ha.get_dict_tuple(TrainSet_result, 'global')
-            TrainSet_top1_error = ha.get_dict_tuple(TrainSet_result_global, 'top1_error')
+            TrainSet_result_max_num_detections_all = ha.get_dict_tuple(TrainSet_result, 'max_num_detections_all')
+            TrainSet_area_all = ha.get_dict_tuple(TrainSet_result_max_num_detections_all, 'area_all')
+            TrainSet_mean_ap =  ha.get_dict_tuple(TrainSet_area_all, 'mean_ap')
 
             ValidationSet_result = ha.get_dict_tuple(Evaluation_Info, 'result')
-            ValidationSet_result_global = ha.get_dict_tuple(ValidationSet_result, 'global')
-            ValidationSet_top1_error = ha.get_dict_tuple(ValidationSet_result_global, 'top1_error')
+            ValidationSet_result_max_num_detections_all = ha.get_dict_tuple(ValidationSet_result, 'max_num_detections_all')
+            ValidationSet_area_all = ha.get_dict_tuple(ValidationSet_result_max_num_detections_all, 'area_all')
+            ValidationSet_mean_ap = ha.get_dict_tuple(ValidationSet_area_all, 'mean_ap')
 
-            TrainSet_top1_error_value = TrainSet_top1_error[0]
-            ValidationSet_top1_error_value = ValidationSet_top1_error[0]
+            TrainSet_mean_ap_value = TrainSet_mean_ap[0]
+            ValidationSet_mean_ap_value = ValidationSet_mean_ap[0]
 
         except:
             Evaluation_Info = ha.read_dict(EvaluationInfoDir, (), ())
 
             epoch_evaluation = ha.get_dict_tuple(Evaluation_Info, 'epoch')
             epoch_evaluation_value = epoch_evaluation[0]
+
             TrainSet_result = ha.get_dict_tuple(Evaluation_Info, 'result_train')
-            TrainSet_result_global = ha.get_dict_tuple(TrainSet_result, 'global')
-            TrainSet_top1_error = ha.get_dict_tuple(TrainSet_result_global, 'top1_error')
+            TrainSet_result_max_num_detections_all = ha.get_dict_tuple(TrainSet_result, 'max_num_detections_all')
+            TrainSet_area_all = ha.get_dict_tuple(TrainSet_result_max_num_detections_all, 'area_all')
+            TrainSet_mean_ap = ha.get_dict_tuple(TrainSet_area_all, 'mean_ap')
 
             ValidationSet_result = ha.get_dict_tuple(Evaluation_Info, 'result')
-            ValidationSet_result_global = ha.get_dict_tuple(ValidationSet_result, 'global')
-            ValidationSet_top1_error = ha.get_dict_tuple(ValidationSet_result_global, 'top1_error')
+            ValidationSet_result_max_num_detections_all = ha.get_dict_tuple(ValidationSet_result,
+                                                                            'max_num_detections_all')
+            ValidationSet_area_all = ha.get_dict_tuple(ValidationSet_result_max_num_detections_all, 'area_all')
+            ValidationSet_mean_ap = ha.get_dict_tuple(ValidationSet_area_all, 'mean_ap')
 
-            TrainSet_top1_error_value = TrainSet_top1_error[0]
-            ValidationSet_top1_error_value = ValidationSet_top1_error[0]
-        return epoch_evaluation_value, TrainSet_top1_error_value, ValidationSet_top1_error_value
+            TrainSet_mean_ap_value = TrainSet_mean_ap[0]
+            ValidationSet_mean_ap_value = ValidationSet_mean_ap[0]
+        return epoch_evaluation_value, TrainSet_mean_ap_value, ValidationSet_mean_ap_value
     else:
         return False

@@ -17,8 +17,11 @@ iterationList = []
 lossList = []
 epochOfLossList = []
 epochOfTop1ErrorList = []
+epochOfMeanAPList = []
 TrainSet_top1_error_valueList = []
 ValidationSet_top1_error_valueList = []
+TrainSet_mean_ap_valueList = []
+ValidationSet_mean_ap_valueList = []
 metricList = []
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -141,18 +144,27 @@ app.layout = html.Div([
 
                 html.Br(),
                 html.Br(),
-                # html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
-                html.Button(id='operation_button_CL', n_clicks=0, children='Start Training'),
-                # html.Button(id='train_button', n_clicks=0, children='Train'),
-                # html.Button(id='parameters_out_button', n_clicks=0, children='Output Parameters'),
-                html.Button(id='evaluation_button_CL', n_clicks=0, children='Evaluation'),
-                html.H3("Edit text input to see loading state"),
-
                 dcc.Loading(
                     id="loading-1",
                     type="default",
                     children=html.Div(id="Training_loading_CL")
                 ),
+                html.Div([
+                    # html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
+                    html.Button(id='operation_button_CL', n_clicks=0, children='Start Training'),
+                    # html.Button(id='train_button', n_clicks=0, children='Train'),
+                    # html.Button(id='parameters_out_button', n_clicks=0, children='Output Parameters'),
+                    html.Button(id='evaluation_button_CL', n_clicks=0, children='Evaluation'),
+
+                ],
+                    style={
+                        'width': '70%', 'float': 'right',
+                    }
+                ),
+                html.Br(),
+                html.Br(),
+                html.Br(),
+                html.Br(),
                 html.Div(id='Operation_output_CL'),
                 html.Div(id='makeJson_CL'),
                 # html.Div(id='output-state'),
@@ -279,7 +291,7 @@ app.layout = html.Div([
                         # dcc.Input(id='ClassIDsNoOrientation', value='[]', type='text'),
                     ],
                         style={'width': '15%', 'float': 'initial', 'display': 'inline-block',
-                               'border': '3px solid blue', }),
+                               }),
 
                     # Estimated Value show and input
                     html.Div([
@@ -305,7 +317,7 @@ app.layout = html.Div([
                                             step=1,
                                             debounce=True), ]),
                         html.Br(),
-                        html.Div([html.P('Anchor Aspect Ratios: '),
+                        html.Div([html.P('Anchor Aspect Ratios (min,max,mean,deviation): '),
                                   html.Div(id='AnchorAspectRatios_OD'),
                                   dcc.Input(id='AnchorAspectRatios_Input_OD',
                                             placeholder='List (0.720, 1.475, 2.125, 2.753)',
@@ -376,7 +388,7 @@ app.layout = html.Div([
                                  'color': 'Blue'
                              }),
                     dcc.Graph(id='iteration_loss_graph_OD'),
-                    dcc.Graph(id='top1_error_graph_OD'),
+                    dcc.Graph(id='mean_ap_graph_OD'),
                     dcc.Interval(
                         id='interval_graph_OD',
                         interval=1 * 1000,  # in milliseconds
@@ -387,6 +399,7 @@ app.layout = html.Div([
         ]),
     ]),
 ])
+
 
 ############################################################################################################
 ############################################## Call Backs ##################################################
@@ -703,10 +716,10 @@ def iteration_loss_graph_CL(n):
         # Avoid duplicate output from Halcon.
         # Interval for this web app is set to 1 sec. However feedback from Halcon may take up tp 5 secs.
         # Using <in> with list, average time complexity: O(n)
-        if iteration not in iterationList:
-            epochOfLossList.append(epoch_TrainInfo)
-            lossList.append(loss)
-            iterationList.append(iteration)
+        # if iteration not in iterationList:
+        epochOfLossList.append(epoch_TrainInfo)
+        lossList.append(loss)
+        iterationList.append(iteration)
 
     # Add the values to graph and start plotting.
     iteration_loss_graph_fig.append_trace({
@@ -991,6 +1004,62 @@ def iteration_loss_graph_CL(n):
     }, 1, 1)
 
     return iteration_loss_graph_fig
+
+
+@app.callback(Output('mean_ap_graph_OD', 'figure'),
+              Input('interval_graph_OD', 'n_intervals'))
+def mean_ap_graph_OD(n):
+    # Mean AP  Graph configuration.
+    # Using plotly subplots. May consider changing to others.
+    mean_ap_graph_fig = plotly.tools.make_subplots(rows=1, cols=1, vertical_spacing=1, )
+    mean_ap_graph_fig['layout']['margin'] = {
+        'l': 80, 'r': 80, 'b': 100, 't': 80, 'autoexpand': False,
+    }
+    mean_ap_graph_fig['layout']['legend'] = {'x': 0, 'y': 1, 'xanchor': 'left'}
+    mean_ap_graph_fig.update_xaxes(title_text="Epoch", row=1, col=1)
+    mean_ap_graph_fig.update_yaxes(title_text="Top1 Error", row=1, col=1)
+
+    # If Hdict files does not exist, clear graph and lists for plotting.
+    # Therefore, could reset graph by deleting the Hdict files.
+    getEvaluationInfo = run_OD.get_EvaluationInfo_OD()
+    if not getEvaluationInfo:
+
+        TrainSet_mean_ap_valueList.clear()
+        ValidationSet_mean_ap_valueList.clear()
+        epochOfMeanAPList.clear()
+    else:
+        epoch_EvaluationInfo = getEvaluationInfo[0]
+        TrainSet_mean_ap_value = getEvaluationInfo[1]
+        ValidationSet_mean_ap_value = getEvaluationInfo[2]
+
+        # Avoid duplicate output from Halcon.
+        # Interval for this web app is set to 1 sec. However feedback from Halcon may take up tp 5 secs.
+        # Using <in> with list, average time complexity: O(n)
+        # if TrainSet_mean_ap_value not in TrainSet_mean_ap_valueList:
+        epochOfMeanAPList.append(epoch_EvaluationInfo)
+        TrainSet_mean_ap_valueList.append(TrainSet_mean_ap_value)
+        ValidationSet_mean_ap_valueList.append(ValidationSet_mean_ap_value)
+
+        # Add the values to graph and start plotting.
+        # Two plots on the same graph.
+        mean_ap_graph_fig.append_trace({
+            'x': epochOfMeanAPList,
+            'y': TrainSet_mean_ap_valueList,
+
+            'name': 'Train Set Top1_error',
+            'mode': 'lines+markers',
+            'type': 'scatter'
+        }, 1, 1)
+
+        mean_ap_graph_fig.append_trace({
+            'x': epochOfMeanAPList,
+            'y': ValidationSet_mean_ap_valueList,
+
+            'name': 'Validation Set Top1_error',
+            'mode': 'lines+markers',
+            'type': 'scatter'
+        }, 1, 1)
+    return mean_ap_graph_fig
 
 
 if __name__ == '__main__':
