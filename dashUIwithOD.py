@@ -147,7 +147,8 @@ app.layout = html.Div([
                 dcc.Loading(
                     id="loading-1",
                     type="default",
-                    children=html.Div(id="Training_loading_CL")
+                    children=[html.Div(id="Training_loading_CL"),
+                              html.Div(id="Evaluation_loading_CL")]
                 ),
                 html.Div([
                     # html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
@@ -299,26 +300,32 @@ app.layout = html.Div([
                         html.P('Key in new desired value or leave it empty: '),
                         html.Br(),
                         html.Div([html.P('Min Level: '),
-                                  html.Label(id='MinLevel_OD'),
+
+                                  html.Div([html.Div(id='MinLevel_OD'), ],
+                                           style={"font": 'Helvetica', 'color': 'Blue'}),
                                   dcc.Input(id='MinLevel_Input_OD', placeholder='Integer', type='number', min=0,
                                             step=1,
                                             debounce=True), ]),
                         html.Br(),
                         html.Div([html.P('Max Level: '),
-                                  html.Div(id='MaxLevel_OD'),
+
+                                  html.Div([html.Div(id='MaxLevel_OD'), ],
+                                           style={"font": 'Helvetica', 'color': 'Blue'}),
                                   dcc.Input(id='MaxLevel_Input_OD', placeholder='Integer', type='number', min=0,
                                             step=1,
                                             debounce=True), ]),
                         html.Br(),
                         html.Div([html.P('Anchor Number of Subscales: '),
-                                  html.Div(id='AnchorNumSubscales_OD'),
+                                  html.Div([html.Div(id='AnchorNumSubscales_OD'), ],
+                                           style={"font": 'Helvetica', 'color': 'Blue'}),
                                   dcc.Input(id='AnchorNumSubscales_Input_OD', placeholder='Integer', type='number',
                                             min=0,
                                             step=1,
                                             debounce=True), ]),
                         html.Br(),
                         html.Div([html.P('Anchor Aspect Ratios (min,max,mean,deviation): '),
-                                  html.Div(id='AnchorAspectRatios_OD'),
+                                  html.Div([html.Div(id='AnchorAspectRatios_OD'), ],
+                                           style={"font": 'Helvetica', 'color': 'Blue'}),
                                   dcc.Input(id='AnchorAspectRatios_Input_OD',
                                             placeholder='List (0.720, 1.475, 2.125, 2.753)',
                                             type='text', min=0, debounce=True, style={'width': '50%', }), ]),
@@ -334,6 +341,12 @@ app.layout = html.Div([
                 html.Br(),
                 html.Br(),
                 html.Br(),
+                dcc.Loading(
+                    id="loading_OD",
+                    type="default",
+                    children=[html.Div(id="Training_loading_OD"),
+                              html.Div(id="Estimate_values_loading_OD")]
+                ),
                 html.Br(),
 
                 # Buttons
@@ -477,6 +490,7 @@ def operation_CL(operation_button_CL, ProjectName_CL, Runtime_CL, PretrainedMode
 
 
 @app.callback(Output('evaluation_graph_CL', 'figure'),
+              Output('Evaluation_loading_CL', 'children'),
               Input('evaluation_button_CL', 'n_clicks'),
               State('ProjectName_CL', 'value'),
               State('Runtime_CL', 'value'),
@@ -600,7 +614,7 @@ def evaluation_CL(evaluation_button_CL, ProjectName_CL, Runtime_CL, PretrainedMo
         # add colorbar
         fig['data'][0]['showscale'] = True
 
-    return fig
+    return fig, ' '
 
 
 # Historical method to produce json file of input parameters
@@ -797,6 +811,7 @@ def top1_error_graph_CL(n):
               Output('MaxLevel_OD', 'children'),
               Output('AnchorNumSubscales_OD', 'children'),
               Output('AnchorAspectRatios_OD', 'children'),
+              Output('Estimate_values_loading_OD', 'children'),
               Input('estimate_button_OD', 'n_clicks'),
               State('ImWidth_OD', 'value'),
               State('ImHeight_OD', 'value'),
@@ -824,13 +839,15 @@ def estimate_value_OD(estimate_button_OD, ImWidth_OD, ImHeight_OD, TrainingPerce
         AnchorAspectRatios_OD_String = ", ".join(str(number) for number in estimate_value)
         AnchorAspectRatios_OD = AnchorAspectRatios_OD_String
 
-        return MinLevel_OD, MaxLevel_OD, AnchorNumSubscales_OD, AnchorAspectRatios_OD
+        return MinLevel_OD, MaxLevel_OD, AnchorNumSubscales_OD, AnchorAspectRatios_OD, ' '
 
     else:
-        return ' ', ' ', ' ', ' '
+        return ' ', ' ', ' ', ' ', ' '
 
 
 @app.callback(Output('training_output_OD', 'children'),
+
+              Output('Training_loading_OD', 'children'),
               Input('operation_button_OD', 'n_clicks'),
 
               # State('ProjectName_OD', 'value'),
@@ -927,7 +944,7 @@ def operation_OD(operation_button_OD, ImWidth_OD, ImHeight_OD, TrainingPercent_O
         # Training
         training_OD = run_OD.training_OD(DLDataset, DLModelHandle, TrainParam)
 
-    return ' '
+    return ' ', ' '
 
 
 # OD metrics and graphs

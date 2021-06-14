@@ -274,7 +274,7 @@ def training_OD(DLDataset, DLModelHandle, TrainParam):
     training_call.set_input_control_param_by_name('DLDataset', DLDataset)
     training_call.set_input_control_param_by_name('TrainParam', TrainParam)
     training_call.set_input_control_param_by_name('StartEpoch', 0)
-    training_call.set_input_control_param_by_name('Display_Ctrl', 1)
+    training_call.set_input_control_param_by_name('Display_Ctrl', 0)
 
     training_call.execute()
 
