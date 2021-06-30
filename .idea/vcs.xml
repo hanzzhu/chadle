@@ -5,5 +5,6 @@
     <mapping directory="$PROJECT_DIR$/Halcon_Python_GUI_Project" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/PyHalcon" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/PyHalcon-GUI" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Singapore-car-park-slot-checker" vcs="Git" />
   </component>
 </project>
